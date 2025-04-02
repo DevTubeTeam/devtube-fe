@@ -1,4 +1,4 @@
-import { InputWithIcon } from '@/components/ui/InputWithIcon';
+import { InputWithIcon } from '@/components/ui/input/InputWithIcon';
 import { Search } from 'lucide-react';
 import * as React from 'react';
 

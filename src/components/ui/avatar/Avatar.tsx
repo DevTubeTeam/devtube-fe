@@ -74,4 +74,3 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
 Avatar.displayName = 'Avatar';
 
 export { Avatar, AvatarFallback, AvatarImage };
-export default Avatar;

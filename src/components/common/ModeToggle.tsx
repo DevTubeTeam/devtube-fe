@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks';
 import { Moon, Sun } from 'lucide-react';
 

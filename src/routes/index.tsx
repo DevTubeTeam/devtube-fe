@@ -1,4 +1,4 @@
-import { HomeFeedLayout } from '@/layouts/HomeFeedLayout';
+import HomeFeedLayout from '@/layouts/HomeFeedLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
@@ -17,7 +17,7 @@ const Explore = lazy(() => import('@/pages/explore'));
 // const MyVideos = lazy(
 //   () => import('@/pages/dashboard/videos'),
 // );
-// const EditVideo = lazy(    
+// const EditVideo = lazy(
 //   () => import('@/pages/dashboard/videos/edit'),
 // );
 // const UploadVideo = lazy(

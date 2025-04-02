@@ -1,19 +1,30 @@
 import NavBar from '@/components/shared/Navbar';
+import { UIContext } from '@/contexts/UIContext';
 import { useIsMobile, useIsTablet } from '@/hooks/useBreakpoint';
+import { useContext } from 'react';
 import { Outlet } from 'react-router-dom';
 
 export default function PublicLayout() {
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
+  const uiContext = useContext(UIContext);
+
+  if (!uiContext) {
+    throw new Error(
+      'UIContext is undefined. Ensure that a provider is wrapping the component tree.',
+    );
+  }
+
+  const { openCloseHomeDrawer } = uiContext;
 
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <NavBar />
+      <NavBar onOpenDrawer={openCloseHomeDrawer} />
 
       {/* Content */}
       <main
-        className={`flex-1 container mx-auto w-full px-4 py-6 ${
+        className={`flex-1 container  w-full px-4 py-6 ${
           isMobile ? 'text-sm' : isTablet ? 'text-base' : 'text-lg'
         }`}
       >
