@@ -5,7 +5,7 @@ import { RouteObject } from 'react-router-dom';
 
 // Public routes
 const Home = lazy(() => import('@/pages/home'));
-// const Login = lazy(() => import('@/pages/auth'));
+const Login = lazy(() => import('@/pages/auth'));
 const Search = lazy(() => import('@/pages/search'));
 const Explore = lazy(() => import('@/pages/explore'));
 // const NotFound = lazy(() => import('@/pages/not-found'));
@@ -67,7 +67,6 @@ export const appRoutes: RouteObject[] = [
       //   element: <ChannelLayout />,
       //   children: [{ path: '', element: <Channel /> }],
       // },
-      // { path: 'login', element: <Login /> },
     ],
   },
 
@@ -108,4 +107,5 @@ export const appRoutes: RouteObject[] = [
 
   //   { path: '/403', element: <AccessDenied /> },
   //   { path: '*', element: <NotFound /> },
+  { path: 'auth/callback', element: <Login /> },
 ];
