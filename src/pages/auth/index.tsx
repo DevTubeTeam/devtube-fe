@@ -1,23 +1,32 @@
-import { useGoogleLogin } from '@/hooks';
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import useGoogleCallback from '@/hooks/useGoogleCallback';
+import { GoogleCallbackRequest } from '@/types/auth';
+import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 
 const LoginPage = () => {
-  const { mutate: loginWithGoogle, status } = useGoogleLogin();
-  const isLoading = status === 'pending';
+  const { googleCallbackMutation } = useGoogleCallback();
+  const isLoading = googleCallbackMutation.isPending;
 
-  const handleLoginSuccess = (credentialResponse: any) => {
-    const token = credentialResponse.credential;
-    loginWithGoogle(token, {
-      onSuccess: data => {
-        console.log('Login successful:', data);
-        localStorage.setItem('accessToken', data.accessToken);
-        window.location.href = '/dashboard';
-      },
-      onError: error => {
-        console.error('Error during login:', error);
-      },
-    });
-  };
+  const login = useGoogleLogin({
+    flow: 'auth-code', // ✅ Bắt buộc: chuyển sang Authorization Code Flow
+    onSuccess: response => {
+      const { code } = response;
+      if (!code) {
+        console.error('No code received');
+        return;
+      }
+
+      console.log('Authorization Code:', code);
+
+      const googleCallbackRequest: GoogleCallbackRequest = {
+        code: code, // đây mới là mã `code` thật
+      };
+
+      googleCallbackMutation.mutate(googleCallbackRequest);
+    },
+    onError: () => {
+      console.error('Google login failed');
+    },
+  });
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
@@ -29,12 +38,14 @@ const LoginPage = () => {
           <p className="text-gray-600 mb-6">
             Sign in to continue to your account
           </p>
-          <GoogleLogin
-            onSuccess={handleLoginSuccess}
-            onError={() => {
-              console.error('Login Failed');
-            }}
-          />
+
+          <button
+            onClick={() => login()}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+          >
+            Sign in with Google
+          </button>
+
           {isLoading && <p>Loading...</p>}
         </div>
       </div>

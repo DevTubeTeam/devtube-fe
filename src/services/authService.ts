@@ -1,14 +1,13 @@
-import API_ENDPOINTS from '@/configs/apiEndpoints';
 import api from '@/services/axios';
-import { GoogleLoginRequest, GoogleLoginResponse } from '@/types/auth';
+import { GoogleCallbackRequest, GoogleCallbackResponse } from '@/types/auth';
+import API_ENDPOINTS from '../configs/apiEndpoints';
 
 const authService = {
-  checkRoomAvailability: async (payload: GoogleLoginRequest) => {
-    return await api.post<HttpResponse<GoogleLoginResponse>>(
-      `${API_ENDPOINTS.AUTH.LOGIN}`,
-      payload,
+  handleGoogleCallback: async (payload: GoogleCallbackRequest) => {
+    return await api.get<HttpResponse<GoogleCallbackResponse>>(
+      `${API_ENDPOINTS.AUTH.CALLBACK}?code=${payload.code}`,
     );
   },
 };
 
-export default reservationService;
+export default authService;

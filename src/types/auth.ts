@@ -1,9 +1,8 @@
-// Payload gửi lên server khi đăng nhập bằng Google
-export interface GoogleLoginRequest {
-  token: string;
+export interface GoogleCallbackRequest {
+  code: string;
 }
 
-// Response từ server sau khi đăng nhập thành công
-export interface GoogleLoginResponse {
+export interface GoogleCallbackResponse {
   accessToken: string;
+  refreshToken?: string;
 }

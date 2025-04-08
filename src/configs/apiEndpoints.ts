@@ -2,6 +2,7 @@ const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/google',
     REFRESH: '/auth/refresh',
+    CALLBACK: '/auth/google/callback', // Thêm endpoint callback
   },
   USER: {
     PROFILE: '/user/profile',
