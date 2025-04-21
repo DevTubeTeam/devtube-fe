@@ -16,12 +16,15 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const toggleTheme = () => {
-    applyTheme(theme === 'light' ? 'dark' : 'light');
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    applyTheme(nextTheme);
   };
 
   useEffect(() => {
     const stored = localStorage.getItem('theme') as ThemeType | null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)',
+    ).matches;
 
     if (stored === 'dark' || stored === 'light') {
       applyTheme(stored);
@@ -29,6 +32,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       applyTheme(prefersDark ? 'dark' : 'light');
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>

@@ -15,7 +15,7 @@ const LoginPage = () => {
         return;
       }
 
-      console.log('Authorization Code:', code);
+      console.log('Authorization Code:', response);
 
       const googleCallbackRequest: GoogleCallbackRequest = {
         code: code, // đây mới là mã `code` thật

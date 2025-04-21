@@ -4,13 +4,12 @@ import {
   MobileDrawer,
   TabletDrawer,
 } from '@/components/ui/drawer';
-import { UIContext } from '@/contexts';
 import { useIsDesktop, useIsMobile, useIsTablet } from '@/hooks/useBreakpoint';
 import { Menu } from 'lucide-react';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-export default function HomeFeedLayout() {
+export function HomeFeedLayout() {
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
   const isDesktop = useIsDesktop();
@@ -20,8 +19,8 @@ export default function HomeFeedLayout() {
     <div className="flex flex-col md:flex-row w-full h-screen overflow-hidden">
       {/* Desktop sidebar */}
       {isDesktop && (
-        <aside className="w-80 h-full overflow-y-auto border-r">
-          <DesktopDrawer  />
+        <aside className="w-80 h-full overflow-y-auto">
+          <DesktopDrawer />
         </aside>
       )}
 

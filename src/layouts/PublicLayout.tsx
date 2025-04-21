@@ -4,7 +4,7 @@ import { useIsMobile, useIsTablet } from '@/hooks/useBreakpoint';
 import { useContext } from 'react';
 import { Outlet } from 'react-router-dom';
 
-export default function PublicLayout() {
+export function PublicLayout() {
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
   const uiContext = useContext(UIContext);
