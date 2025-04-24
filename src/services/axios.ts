@@ -1,8 +1,9 @@
+import { storageUtil } from '@/utils';
 import axios, { AxiosInstance } from 'axios';
 
 let accessToken: string | null = null;
 
-export const setAccessToken = (token: string) => {
+const setAccessToken = (token: string | null) => {
   accessToken = token;
 };
 
@@ -28,12 +29,32 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const res = await api.post('/auth/refresh');
-        accessToken = res.data.accessToken;
-        originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+        const stored = storageUtil.get<{ tokens: { accessToken: string; refreshToken: string; idToken: string } }>(
+          'user_auth',
+        );
+        if (!stored?.tokens.refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        const res = await api.post('/auth/refresh', { refreshToken: stored.tokens.refreshToken });
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = res.data.data;
+
+        accessToken = newAccessToken;
+        setAccessToken(newAccessToken);
+
+        // Cập nhật tokens trong localStorage
+        if (stored) {
+          storageUtil.set('user_auth', {
+            ...stored,
+            tokens: { ...stored.tokens, accessToken: newAccessToken, refreshToken: newRefreshToken },
+          });
+        }
+
+        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (err) {
-        window.location.href = '/login';
+        // Không chuyển hướng ngay, để component xử lý
+        console.error('Refresh token failed:', err);
         return Promise.reject(err);
       }
     }
@@ -41,4 +62,4 @@ api.interceptors.response.use(
   },
 );
 
-export default api;
+export { api, setAccessToken };

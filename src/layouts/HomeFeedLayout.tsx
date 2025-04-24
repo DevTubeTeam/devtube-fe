@@ -1,11 +1,7 @@
-import { Button } from '@/components/ui/button';
-import {
-  DesktopDrawer,
-  MobileDrawer,
-  TabletDrawer,
-} from '@/components/ui/drawer';
+import NavBar from '@/components/shared/Navbar';
+import DesktopDrawer from '@/components/ui/drawer/DesktopDrawer';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useIsDesktop, useIsMobile, useIsTablet } from '@/hooks/useBreakpoint';
-import { Menu } from 'lucide-react';
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
@@ -13,10 +9,15 @@ export function HomeFeedLayout() {
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
   const isDesktop = useIsDesktop();
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false); // 💡 State cho Sheet
 
   return (
     <div className="flex flex-col md:flex-row w-full h-screen overflow-hidden">
+      {/* NavBar */}
+      {(isMobile || isTablet) && (
+        <NavBar openCloseHomeDrawer={() => setDrawerOpen(true)} /> // 💡 truyền hàm toggle
+      )}
+
       {/* Desktop sidebar */}
       {isDesktop && (
         <aside className="w-80 h-full overflow-y-auto">
@@ -24,42 +25,13 @@ export function HomeFeedLayout() {
         </aside>
       )}
 
-      {/* Tablet sidebar with drawer */}
-      {isTablet && (
-        <TabletDrawer
-          className="h-screen sticky top-0"
-          trigger={
-            <Button
-              variant="ghost"
-              size="icon"
-              className="fixed top-4 left-4 z-10"
-            >
-              <Menu />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          }
-        >
-          <DesktopDrawer />
-        </TabletDrawer>
-      )}
-
-      {/* Mobile drawer */}
-      {isMobile && (
-        <>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="fixed top-4 left-4 z-10"
-            onClick={() => setMobileDrawerOpen(true)}
-          >
-            <Menu />
-            <span className="sr-only">Open menu</span>
-          </Button>
-          <MobileDrawer
-            open={mobileDrawerOpen}
-            onClose={() => setMobileDrawerOpen(false)}
-          />
-        </>
+      {/* Mobile & Tablet Drawer */}
+      {(isTablet || isMobile) && (
+        <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <SheetContent side="left" className="w-64">
+            <DesktopDrawer />
+          </SheetContent>
+        </Sheet>
       )}
 
       {/* Main content */}

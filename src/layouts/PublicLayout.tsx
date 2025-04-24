@@ -10,9 +10,7 @@ export function PublicLayout() {
   const uiContext = useContext(UIContext);
 
   if (!uiContext) {
-    throw new Error(
-      'UIContext is undefined. Ensure that a provider is wrapping the component tree.',
-    );
+    throw new Error('UIContext is undefined. Ensure that a provider is wrapping the component tree.');
   }
 
   const { openCloseHomeDrawer } = uiContext;
@@ -20,13 +18,11 @@ export function PublicLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <NavBar onOpenDrawer={openCloseHomeDrawer} />
+      <NavBar openCloseHomeDrawer={openCloseHomeDrawer} />
 
       {/* Content */}
       <main
-        className={`flex-1 container  w-full px-4 py-6 ${
-          isMobile ? 'text-sm' : isTablet ? 'text-base' : 'text-lg'
-        }`}
+        className={`flex-1 container  w-full px-4 py-6 ${isMobile ? 'text-sm' : isTablet ? 'text-base' : 'text-lg'}`}
       >
         <Outlet />
       </main>
@@ -34,9 +30,7 @@ export function PublicLayout() {
       {/* Footer */}
       <footer
         className={`w-full border-t text-sm text-muted-foreground py-4 px-4 ${
-          isMobile
-            ? 'text-center'
-            : 'flex justify-between flex-col md:flex-row gap-2'
+          isMobile ? 'text-center' : 'flex justify-between flex-col md:flex-row gap-2'
         }`}
       >
         <div className="container mx-auto">

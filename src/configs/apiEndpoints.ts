@@ -1,8 +1,11 @@
 const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/auth/google',
+    CALLBACK: '/auth/google/callback',
+    SILENT: '/auth/silent',
+    SILENT_CALLBACK: '/auth/silent/callback',
+    LOGOUT: '/auth/logout',
+    VERIFY_ID_TOKEN: '/auth/verify-id-token',
     REFRESH: '/auth/refresh',
-    CALLBACK: '/auth/google/callback', // Thêm endpoint callback
   },
   USER: {
     PROFILE: '/user/profile',

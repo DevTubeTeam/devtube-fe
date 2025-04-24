@@ -8,6 +8,12 @@ export interface VideoMetadata {
   thumbnail?: string;
 }
 
+export interface PresignedUrlRequest {
+  idToken: string;
+  fileName: string;
+  fileType: string;
+}
+
 export interface PresignedUrlResponse {
   uploadUrl: string;
   key: string;

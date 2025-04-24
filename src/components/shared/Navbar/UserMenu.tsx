@@ -1,88 +1,72 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar/Avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Dropdown } from '@/components/ui/dropdown/Dropdown';
-import { useIsMobile } from '@/hooks/useBreakpoint';
-import { Code } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown';
+
+import { useAuth } from '@/hooks';
+import useLogin from '@/hooks/useLogin';
+import { ILogoutRequest } from '@/types/auth';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const UserMenu: React.FC = () => {
-  const isMobile = useIsMobile();
+  const { user, isAuthenticated, isAuthLoading, logout } = useAuth();
+  const { logoutMutation } = useLogin();
 
-  // Mock user state - in a real application, this would come from authentication context
-  const user = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    avatarUrl: 'https://github.com/shadcn.png', // Example avatar URL
-  };
+  if (isAuthLoading) {
+    return <div>Loading...</div>; // hoặc null
+  }
 
-  // For demonstration, we'll show different UI for logged in vs logged out
-  const isLoggedIn = true; // This would be determined by your auth state
-
-  if (!isLoggedIn) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="flex gap-2">
-        <Button variant="outline" size="sm">
-          Sign In
-        </Button>
-        <Button size="sm">Sign Up</Button>
+        <Link to="/auth">
+          <Button variant="outline" size="sm">
+            Sign In
+          </Button>
+        </Link>
       </div>
     );
   }
 
-  const userActions = [
-    {
-      label: 'My Profile',
-      onClick: () => console.log('Navigate to profile'),
-    },
-    {
-      label: 'My Videos',
-      onClick: () => console.log('Navigate to videos'),
-    },
-    {
-      label: 'Saved',
-      onClick: () => console.log('Navigate to saved'),
-    },
-    {
-      label: 'Settings',
-      onClick: () => console.log('Navigate to settings'),
-    },
-    {
-      label: 'Log out',
-      onClick: () => console.log('Log out user'),
-    },
-  ];
+  const handleLogout = () => {
+    if (user) {
+      const payload: ILogoutRequest = {
+        userId: user.id,
+      };
+      logoutMutation.mutate(payload);
+    }
+  };
 
   return (
     <div className="flex items-center gap-2">
-      {!isMobile && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="hidden sm:flex gap-2 items-center"
-        >
-          <Code size={16} />
-          <span>Upload</span>
-        </Button>
-      )}
-
-      <Dropdown
-        label={
-          <div className="flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="flex items-center gap-2 cursor-pointer">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatarUrl} alt={user.name} />
-              <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
+              <AvatarImage src={user?.avatarUrl || ''} alt={user?.displayName || 'User'} />
+              <AvatarFallback>{user?.displayName?.substring(0, 2) || '??'}</AvatarFallback>
             </Avatar>
-            {!isMobile && <span className="hidden md:inline">{user.name}</span>}
+            <span className="hidden md:inline">{user.displayName}</span>
           </div>
-        }
-        items={userActions}
-        align="right"
-        className="ml-1"
-      />
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="ml-1">
+          <DropdownMenuItem onClick={() => console.log('Navigate to profile')}>My Profile</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => console.log('Navigate to videos')}>My Videos</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => console.log('Navigate to saved')}>Saved</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => console.log('Navigate to settings')}>Settings</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout}>
+            {logoutMutation.isPending ? 'Logging out...' : 'Log out'}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };

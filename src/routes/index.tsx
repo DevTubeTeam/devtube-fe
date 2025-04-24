@@ -1,12 +1,6 @@
-import RequireRole from '@/components/auth/RequireRole';
-import {
-  AdminLayout,
-  ChannelLayout,
-  DashboardLayout,
-  HomeFeedLayout,
-  PublicLayout,
-  WatchLayout,
-} from '@/layouts';
+import { RedirectIfAuthenticated, RequireAuth, RequireRole } from '@/components/guards';
+import { ROUTES } from '@/constants/routes';
+import { AdminLayout, ChannelLayout, DashboardLayout, HomeFeedLayout, PublicLayout, WatchLayout } from '@/layouts';
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 
@@ -17,6 +11,7 @@ const Search = lazy(() => import('@/pages/search'));
 const Explore = lazy(() => import('@/pages/explore'));
 const Watch = lazy(() => import('@/pages/watch'));
 const Channel = lazy(() => import('@/pages/channel'));
+const SilentCallback = lazy(() => import('@/pages/auth/silent'));
 
 // Authenticated routes
 const MyVideos = lazy(() => import('@/pages/dashboard/videos'));
@@ -33,7 +28,7 @@ const AdminSettings = lazy(() => import('@/pages/admin/settings'));
 export const appRoutes: RouteObject[] = [
   // Public routes
   {
-    path: '/',
+    path: ROUTES.HOME,
     element: <PublicLayout />,
     children: [
       {
@@ -41,17 +36,17 @@ export const appRoutes: RouteObject[] = [
         element: <HomeFeedLayout />,
         children: [
           { path: '', element: <Home /> },
-          { path: 'explore', element: <Explore /> },
-          { path: 'search', element: <Search /> },
+          { path: ROUTES.EXPLORE.slice(1), element: <Explore /> },
+          { path: ROUTES.SEARCH.slice(1), element: <Search /> },
         ],
       },
       {
-        path: 'video/:id',
+        path: ROUTES.VIDEO.slice(1),
         element: <WatchLayout />,
         children: [{ path: '', element: <Watch /> }],
       },
       {
-        path: 'channel/:id',
+        path: ROUTES.CHANNEL(),
         element: <ChannelLayout />,
         children: [{ path: '', element: <Channel /> }],
       },
@@ -60,11 +55,11 @@ export const appRoutes: RouteObject[] = [
 
   // Authenticated routes
   {
-    path: '/dashboard',
+    path: ROUTES.DASHBOARD,
     element: (
-      // <RequireAuth>
-      <DashboardLayout />
-      // </RequireAuth>
+      <RequireAuth>
+        <DashboardLayout />
+      </RequireAuth>
     ),
     children: [
       { path: '', element: <MyVideos /> },
@@ -78,7 +73,7 @@ export const appRoutes: RouteObject[] = [
 
   // Admin routes
   {
-    path: '/admin',
+    path: ROUTES.ADMIN,
     element: (
       <RequireRole role="admin">
         <AdminLayout />
@@ -92,5 +87,18 @@ export const appRoutes: RouteObject[] = [
       { path: 'settings', element: <AdminSettings /> },
     ],
   },
-  { path: 'auth/callback', element: <Login /> },
+
+  // Auth route
+  {
+    path: ROUTES.AUTH.slice(1),
+    element: (
+      <RedirectIfAuthenticated>
+        <Login />
+      </RedirectIfAuthenticated>
+    ),
+  },
+  // {
+  //   path: ROUTES.AUTH_SILENT.slice(1),
+  //   element: <SilentCallback />,
+  // },
 ];

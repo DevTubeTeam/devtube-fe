@@ -1,8 +1,6 @@
 type HttpResponse<T> = {
-  statusCode: number;
-  status: boolean;
+  data: T;
   message: string;
-  payload: T;
-  dateTime: string;
-  error: string;
+  statusCode: number;
+  meta: any;
 };
