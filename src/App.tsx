@@ -1,17 +1,11 @@
+import SuspenseFallback from '@/components/ui/SuspenseFallback';
 import { useRoutesCustom } from '@/hooks/useRoutesCustom';
+import { Suspense } from 'react';
 
 function App() {
-  // Edit the url to match your API endpoint
-  // useEffect(() => {
-  //   api
-  //     .post('/auth/refresh')
-  //     .then(res => setAccessToken(res.data.accessToken))
-  //     .catch(() => (window.location.href = '/login'));
-  // }, []);
+  const routes = useRoutesCustom();
 
-  console.log('rendering app');
-
-  return <>{useRoutesCustom()}</>;
+  return <Suspense fallback={<SuspenseFallback />}>{routes}</Suspense>;
 }
 
 export default App;

@@ -1,5 +1,13 @@
-const UploadVideoPage = () => {
-  return <div>UploadVideoPage</div>;
+import DropzoneComponent from '@/components/ui/form/DropZone';
+
+type Props = {};
+
+const UploadPage = (props: Props) => {
+  return (
+    <>
+      <DropzoneComponent />
+    </>
+  );
 };
 
-export default UploadVideoPage;
+export default UploadPage;

@@ -1,7 +1,11 @@
-import { AuthContext, AuthUser } from '@/contexts/AuthContext';
-import Cookies from 'js-cookie';
+import { AuthContext } from '@/contexts/AuthContext';
+import authService from '@/services/authService';
+import { setAccessToken } from '@/services/axios';
+import { IGoogleCallBackToken, IGoogleCallBackUser } from '@/types/auth';
+import { storageUtil } from '@/utils';
+import redirectToGoogleSilentLogin from '@/utils/redirectToGoogleSilentLogin';
 import { jwtDecode } from 'jwt-decode';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface JwtPayload {
   sub: string;
@@ -13,60 +17,113 @@ interface JwtPayload {
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [authState, setAuthState] = useState<{
+    user: IGoogleCallBackUser | null;
+    tokens: IGoogleCallBackToken | null;
+  }>({
+    user: null,
+    tokens: null,
+  });
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  const login = (token: string) => {
-    Cookies.set('access_token', token, { secure: true, sameSite: 'Strict' });
-    const decoded = jwtDecode<JwtPayload>(token);
-    setUser({
-      id: decoded.sub,
-      name: decoded.name,
-      email: decoded.email,
-      avatar: decoded.avatar,
-      role: decoded.role,
-    });
-    setAccessToken(token);
-  };
-
-  const logout = () => {
-    Cookies.remove('access_token');
-    setUser(null);
-    setAccessToken(null);
-  };
-
-  useEffect(() => {
-    const token = Cookies.get('access_token');
-    if (token) {
+  const loadUserFromStorage = useCallback(async () => {
+    setIsAuthLoading(true);
+    const stored = storageUtil.get<{ tokens: IGoogleCallBackToken; user: IGoogleCallBackUser }>('user_auth');
+    if (stored) {
+      const { tokens, user } = stored;
       try {
-        const decoded = jwtDecode<JwtPayload>(token);
+        const decoded = jwtDecode<JwtPayload>(tokens.accessToken);
         const now = Date.now() / 1000;
         if (decoded.exp > now) {
-          setUser({
-            id: decoded.sub,
-            name: decoded.name,
-            email: decoded.email,
-            avatar: decoded.avatar,
-            role: decoded.role,
-          });
-          setAccessToken(token);
+          setAccessToken(tokens.accessToken);
+          setAuthState({ user, tokens });
         } else {
-          logout();
+          try {
+            const response = await authService.refreshToken(tokens.refreshToken);
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
+            setAccessToken(newAccessToken);
+            storageUtil.set('user_auth', {
+              user,
+              tokens: { ...tokens, accessToken: newAccessToken, refreshToken: newRefreshToken },
+            });
+            setAuthState({
+              user,
+              tokens: { ...tokens, accessToken: newAccessToken, refreshToken: newRefreshToken },
+            });
+          } catch (error) {
+            console.warn('Failed to refresh token, clearing auth:', error);
+            storageUtil.remove('user_auth');
+            setAuthState({ user: null, tokens: null });
+          }
         }
-      } catch {
-        logout();
+      } catch (error) {
+        console.error('Failed to decode access token:', error);
+        storageUtil.remove('user_auth');
+        setAuthState({ user: null, tokens: null });
       }
+    } else {
+      setAuthState({ user: null, tokens: null });
     }
+    setIsAuthLoading(false);
   }, []);
+
+  // const trySilentLogin = useCallback(async () => {
+  //   const stored = storageUtil.get<{ tokens: IGoogleCallBackToken }>('user_auth');
+  //   if (stored?.tokens.idToken) {
+  //     try {
+  //       const response = await authService.verifyIdToken(stored.tokens.idToken);
+  //       setAuthState(prev => ({
+  //         ...prev,
+  //         user: response.data.data.user,
+  //       }));
+  //     } catch (error) {
+  //       console.warn('Silent login failed, initiating new silent login:', error);
+  //       redirectToGoogleSilentLogin();
+  //     }
+  //   } else {
+  //     // Không có idToken, thực hiện silent login luôn
+  //     redirectToGoogleSilentLogin();
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    loadUserFromStorage();
+  }, [loadUserFromStorage]);
+
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'user_auth') {
+        loadUserFromStorage();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [loadUserFromStorage]);
+
+  // useEffect(() => {
+  //   if (!authState.user && !isAuthLoading) {
+  //     console.log('No user found, attempting silent login...');
+  //     trySilentLogin();
+  //   }
+  // }, [authState.user, isAuthLoading, trySilentLogin]);
+
+  const logout = async () => {
+    storageUtil.remove('user_auth');
+    setAccessToken(null);
+    setAuthState({ user: null, tokens: null });
+  };
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        isAuthenticated: !!user,
-        accessToken,
-        login,
+        user: authState.user,
+        isAuthenticated: !!authState.user,
+        isAuthLoading,
+        tokens: authState.tokens,
+        setUser: user => setAuthState(prev => ({ ...prev, user })),
+        setTokens: tokens => setAuthState(prev => ({ ...prev, tokens })),
         logout,
+        refreshAuth: loadUserFromStorage,
       }}
     >
       {children}

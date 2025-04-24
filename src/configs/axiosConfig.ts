@@ -1,7 +1,7 @@
 import { AxiosRequestConfig } from 'axios';
 
 const axiosConfig: AxiosRequestConfig = {
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.API_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

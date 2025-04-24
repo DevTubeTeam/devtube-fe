@@ -1,25 +1,24 @@
+import { IGoogleCallBackToken, IGoogleCallBackUser } from '@/types/auth';
 import { createContext } from 'react';
 
-export interface AuthUser {
-  id: string;
-  name: string;
-  email?: string;
-  avatar?: string;
-  role: 'user' | 'admin';
-}
-
-interface AuthContextType {
-  user: AuthUser | null;
+interface IAuthContext {
+  user: IGoogleCallBackUser | null;
   isAuthenticated: boolean;
-  accessToken: string | null;
-  login: (accessToken: string) => void;
+  isAuthLoading: boolean;
+  tokens: IGoogleCallBackToken | null;
+  setUser: (user: IGoogleCallBackUser | null) => void;
+  setTokens: (token: IGoogleCallBackToken | null) => void;
   logout: () => void;
+  refreshAuth: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<IAuthContext>({
   user: null,
   isAuthenticated: false,
-  accessToken: null,
-  login: () => {},
+  isAuthLoading: true,
+  tokens: null,
+  setUser: () => {},
+  setTokens: () => {},
   logout: () => {},
+  refreshAuth: () => {},
 });

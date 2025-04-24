@@ -1,4 +1,4 @@
-import { InputWithIcon } from '@/components/ui/InputWithIcon';
+import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import * as React from 'react';
 
@@ -8,11 +8,7 @@ interface SearchInputProps {
   onSearch?: (query: string) => void;
 }
 
-const SearchInput = ({
-  className,
-  placeholder = 'Search videos...',
-  onSearch,
-}: SearchInputProps) => {
+const SearchInput = ({ className, placeholder = 'Search videos...', onSearch }: SearchInputProps) => {
   const [query, setQuery] = React.useState('');
 
   const handleSearch = (e: React.FormEvent) => {
@@ -23,14 +19,14 @@ const SearchInput = ({
   };
 
   return (
-    <form onSubmit={handleSearch} className={className}>
-      <InputWithIcon
+    <form onSubmit={handleSearch} className={`relative ${className}`}>
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+      <Input
         type="search"
         placeholder={placeholder}
         value={query}
         onChange={e => setQuery(e.target.value)}
-        leftIcon={<Search className="h-4 w-4" />}
-        className="w-full"
+        className="pl-9 w-full"
         aria-label="Search"
       />
     </form>
