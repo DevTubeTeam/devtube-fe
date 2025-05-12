@@ -1,7 +1,7 @@
 import VideoPlayer from '@/components/video/VideoPlayer';
 
 const WatchPage = () => {
-  const videoUrl = `https://d1bapesvzv4qyl.cloudfront.net/processed/2rN0XTW8dU8/master.m3u8`;
+  const videoUrl = `https://d1bapesvzv4qyl.cloudfront.net/processed/cb21de00-e93c-42ff-a7c6-080308871c43/index.m3u8`;
 
   return (
     <div className="max-w-4xl mx-auto p-4">

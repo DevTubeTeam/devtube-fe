@@ -8,37 +8,51 @@ import {
   IRefreshTokenResponse,
 } from '@/types/auth';
 
-interface HttpResponse<T> {
-  statusCode: number;
-  message: string;
-  data: T;
-}
-
 const authService = {
-  handleGoogleCallback: async (payload: IGoogleCallbackRequest) => {
-    return await api.get<HttpResponse<IGoogleCallbackResponse>>(`${API_ENDPOINTS.AUTH.CALLBACK}?code=${payload.code}`);
+  handleGoogleCallback: async (payload: IGoogleCallbackRequest): Promise<HttpResponse<IGoogleCallbackResponse | null>> => {
+    try {
+      const response = await api.get(`${API_ENDPOINTS.AUTH.CALLBACK}?code=${payload.code}`);
+      return response.data;
+    } catch (error) {
+      return { statusCode: 500, message: "Failed to fetch products", data: null };
+    }
   },
 
-  // handleSilentLogin: async () => {
-  //   window.location.href = `${api.defaults.baseURL}/auth/silent`;
-  // },
-
-  handleSilentCallback: async (code: string) => {
-    return await api.get<HttpResponse<{ idToken: string }>>(`${API_ENDPOINTS.AUTH.SILENT_CALLBACK}?code=${code}`);
+  handleSilentCallback: async (code: string): Promise<HttpResponse<{ idToken: string } | null>> => {
+    try {
+      const response = await api.get<HttpResponse<{ idToken: string }>>(`${API_ENDPOINTS.AUTH.SILENT_CALLBACK}?code=${code}`);
+      return response.data;
+    } catch (error) {
+      return { statusCode: 500, message: "Failed to fetch products", data: null };
+    };
   },
 
-  handleLogout: async (payload: ILogoutRequest & { accessToken?: string; refreshToken?: string }) => {
-    return await api.post<HttpResponse<null>>(API_ENDPOINTS.AUTH.LOGOUT, payload);
+  handleLogout: async (payload: ILogoutRequest & { accessToken?: string; refreshToken?: string }): Promise<HttpResponse<null>> => {
+    try {
+      const response = await api.post<HttpResponse<null>>(API_ENDPOINTS.AUTH.LOGOUT, payload);
+      return response.data;
+    } catch (error) {
+      return { statusCode: 500, message: "Failed to fetch products", data: null };
+    };
   },
 
-  verifyIdToken: async (idToken: string) => {
-    return await api.post<HttpResponse<{ user: IGoogleCallBackUser }>>(API_ENDPOINTS.AUTH.VERIFY_ID_TOKEN, { idToken });
+  verifyIdToken: async (idToken: string): Promise<HttpResponse<{ user: IGoogleCallBackUser } | null>> => {
+    try {
+      const response = await api.post(API_ENDPOINTS.AUTH.VERIFY_ID_TOKEN, { idToken });
+      return response.data;
+    } catch (error) {
+      return { statusCode: 500, message: "Failed to fetch products", data: null };
+    };
   },
 
-  refreshToken: async (refreshToken: string) => {
-    return await api.post<HttpResponse<IRefreshTokenResponse>>(API_ENDPOINTS.AUTH.REFRESH, { refreshToken });
+  refreshToken: async (refreshToken: string): Promise<HttpResponse<IRefreshTokenResponse | null>> => {
+    try {
+      const response = await api.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken });
+      return response.data;
+    } catch (error) {
+      return { statusCode: 500, message: "Failed to fetch products", data: null };
+    };
   },
-
 };
 
 export default authService;

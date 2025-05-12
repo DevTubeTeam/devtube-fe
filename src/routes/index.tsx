@@ -1,5 +1,6 @@
-import { RedirectIfAuthenticated, RequireAuth, RequireRole } from '@/components/guards';
+import { RedirectIfAuthenticated, RequireRole } from '@/components/guards';
 import { ROUTES } from '@/constants/routes';
+import { UploadProvider } from '@/contexts/UploadContext';
 import { AdminLayout, ChannelLayout, DashboardLayout, HomeFeedLayout, PublicLayout, WatchLayout } from '@/layouts';
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
@@ -11,7 +12,7 @@ const Search = lazy(() => import('@/pages/search'));
 const Explore = lazy(() => import('@/pages/explore'));
 const Watch = lazy(() => import('@/pages/watch'));
 const Channel = lazy(() => import('@/pages/channel'));
-const SilentCallback = lazy(() => import('@/pages/auth/silent'));
+// const SilentCallback = lazy(() => import('@/pages/auth/silent'));
 
 // Authenticated routes
 const MyVideos = lazy(() => import('@/pages/dashboard/videos'));
@@ -57,15 +58,17 @@ export const appRoutes: RouteObject[] = [
   {
     path: ROUTES.DASHBOARD,
     element: (
-      <RequireAuth>
-        <DashboardLayout />
-      </RequireAuth>
+      <DashboardLayout />
     ),
     children: [
       { path: '', element: <MyVideos /> },
       { path: 'videos', element: <MyVideos /> },
       { path: 'videos/edit/:id', element: <EditVideo /> },
-      { path: 'upload', element: <UploadVideo /> },
+      {
+        path: 'upload', element: <UploadProvider>
+          <UploadVideo />
+        </UploadProvider>
+      },
       { path: 'playlists', element: <Playlists /> },
       { path: 'settings', element: <UserSettings /> },
     ],
