@@ -3,7 +3,6 @@ import authService from '@/services/authService';
 import { setAccessToken } from '@/services/axios';
 import { IGoogleCallBackToken, IGoogleCallBackUser } from '@/types/auth';
 import { storageUtil } from '@/utils';
-import redirectToGoogleSilentLogin from '@/utils/redirectToGoogleSilentLogin';
 import { jwtDecode } from 'jwt-decode';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -40,16 +39,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           try {
             const response = await authService.refreshToken(tokens.refreshToken);
-            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
-            setAccessToken(newAccessToken);
-            storageUtil.set('user_auth', {
-              user,
-              tokens: { ...tokens, accessToken: newAccessToken, refreshToken: newRefreshToken },
-            });
-            setAuthState({
-              user,
-              tokens: { ...tokens, accessToken: newAccessToken, refreshToken: newRefreshToken },
-            });
+            if (response.data) {
+              const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+              setAccessToken(newAccessToken);
+              storageUtil.set('user_auth', {
+                user,
+                tokens: { ...tokens, accessToken: newAccessToken, refreshToken: newRefreshToken },
+              });
+            }
+            else {
+              throw new Error('Failed to refresh token');
+            }
           } catch (error) {
             console.warn('Failed to refresh token, clearing auth:', error);
             storageUtil.remove('user_auth');

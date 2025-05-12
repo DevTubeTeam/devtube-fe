@@ -2,13 +2,13 @@ import { useContext } from 'react';
 import { LoaderContext, LoaderContextProps } from '../contexts/LoaderContext';
 
 export const useLoader = (): LoaderContextProps => {
-  const context = useContext(LoaderContext);
+  const loaderContext = useContext(LoaderContext);
 
-  if (!context) {
+  if (!loaderContext) {
     throw new Error('useLoader must be used within a LoaderProvider');
   }
 
-  return context;
+  return loaderContext;
 };
 
 export default useLoader;

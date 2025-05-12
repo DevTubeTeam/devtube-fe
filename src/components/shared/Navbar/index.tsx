@@ -1,8 +1,10 @@
 import { ModeToggle } from '@/components/common/ModeToggle';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/constants/routes';
 import { useIsDesktop, useIsMobile, useIsTablet } from '@/hooks/useBreakpoint';
-import { Menu, Search } from 'lucide-react';
+import { Menu, Search, Upload } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import SearchInput from './SearchInput';
 import UserMenu from './UserMenu';
@@ -32,9 +34,8 @@ const NavBar = ({ openCloseHomeDrawer }: NavBarProps) => {
         {/* Center section: Search (hidden on mobile unless toggled) */}
         {(!isMobile || mobileSearchVisible) && (
           <div
-            className={`${
-              isMobile ? 'absolute inset-x-0 top-14 z-50 px-4 py-2 bg-background border-b' : 'flex-1 max-w-md mx-4'
-            }`}
+            className={`${isMobile ? 'absolute inset-x-0 top-14 z-50 px-4 py-2 bg-background border-b' : 'flex-1 max-w-md mx-4'
+              }`}
           >
             <SearchInput />
           </div>
@@ -42,6 +43,13 @@ const NavBar = ({ openCloseHomeDrawer }: NavBarProps) => {
 
         {/* Right section: Actions */}
         <div className="flex items-center gap-2">
+          {/* Upload button */}
+          <Link to={ROUTES.DASHBOARD_VIDEOS}>
+            <Button variant="ghost" size="icon">
+              <Upload />
+            </Button>
+          </Link>
+
           {/* Mobile search toggle */}
           {isMobile && (
             <Button variant="ghost" size="icon" onClick={() => setMobileSearchVisible(!mobileSearchVisible)}>

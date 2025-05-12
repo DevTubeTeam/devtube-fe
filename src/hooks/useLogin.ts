@@ -1,3 +1,4 @@
+import STATUS_CODE from '@/constants/statusCode';
 import authService from '@/services/authService';
 import { IGoogleCallbackRequest, IGoogleCallbackResponse, ILogoutRequest } from '@/types/auth';
 import { storageUtil } from '@/utils';
@@ -7,13 +8,10 @@ import { useAuth } from './useAuth';
 const useLogin = () => {
   const { logout, refreshAuth } = useAuth();
 
-  const googleCallbackMutation = useMutation({
+  const googleCallbackMutation = useMutation<HttpResponse<IGoogleCallbackResponse | null>, Error, IGoogleCallbackRequest>({
     mutationKey: ['googleCallback'],
-    mutationFn: async (payload: IGoogleCallbackRequest) => {
-      const response = await authService.handleGoogleCallback(payload);
-      return response.data;
-    },
-    onSuccess: (response: HttpResponse<IGoogleCallbackResponse>) => {
+    mutationFn: authService.handleGoogleCallback,
+    onSuccess: (response) => {
       const { data } = response;
 
       if (!data) {
@@ -24,19 +22,19 @@ const useLogin = () => {
       storageUtil.set('user_auth', data);
       refreshAuth();
     },
-    onError: () => {
-      console.error('Error during Google callback mutation');
+    onError: (error) => {
+      console.error('Error during Google callback mutation:', error);
     },
   });
 
-  const logoutMutation = useMutation({
+
+  const logoutMutation = useMutation<HttpResponse<null>, Error, ILogoutRequest>({
     mutationKey: ['logout'],
-    mutationFn: async (payload: ILogoutRequest) => {
-      const response = await authService.handleLogout(payload);
-      return response.data;
-    },
-    onSuccess: (response: HttpResponse<null>) => {
-      if (response.statusCode === 201) {
+    mutationFn: authService.handleLogout,
+    onSuccess: (response) => {
+      const { statusCode } = response;
+
+      if (statusCode === STATUS_CODE.CREATED) {
         logout();
       }
     },

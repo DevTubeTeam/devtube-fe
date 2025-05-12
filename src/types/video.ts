@@ -1,4 +1,4 @@
-export interface VideoMetadata {
+export interface IVideoMetadata {
   title: string;
   description: string;
   fileSize: number;
@@ -8,23 +8,12 @@ export interface VideoMetadata {
   thumbnail?: string;
 }
 
-export interface PresignedUrlRequest {
-  idToken: string;
-  fileName: string;
-  fileType: string;
-}
-
-export interface PresignedUrlResponse {
-  uploadUrl: string;
-  key: string;
-  bucket: string;
-}
-
-export interface VideoFile extends File {
+export interface IVideoFile extends File {
   preview?: string;
   id?: string;
   progress?: number;
-  status?: 'uploading' | 'success' | 'error';
+  status?: 'idle' | 'uploading' | 'success' | 'error';
   error?: string;
   s3Key?: string;
+  uploadId?: string;
 }
