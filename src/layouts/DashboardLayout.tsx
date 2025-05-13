@@ -1,5 +1,4 @@
 import { ModeToggle } from '@/components/common/ModeToggle';
-import { useTheme } from '@/hooks/useTheme';
 import {
   BarChart,
   Bell,
@@ -21,7 +20,6 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 export const DashboardLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
-  const { theme } = useTheme();
 
   // Main navigation items (phần trên)
   const mainNavigationItems = [
@@ -71,9 +69,8 @@ export const DashboardLayout = () => {
     <div className={`flex min-h-screen}`}>
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'w-16' : 'w-64'
-        } border-r shadow-sm flex flex-col`}
+        className={`fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'
+          } border-r shadow-sm flex flex-col`}
       >
         {/* Sidebar Header */}
         <div

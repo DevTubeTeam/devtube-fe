@@ -1,8 +1,7 @@
 import { Outlet } from 'react-router-dom';
 
-type Props = {};
 
-export const WatchLayout = (props: Props) => {
+export const WatchLayout = () => {
   return (
     <div>
       <h1>WatchLayout</h1>
@@ -10,4 +9,3 @@ export const WatchLayout = (props: Props) => {
     </div>
   );
 };
-  

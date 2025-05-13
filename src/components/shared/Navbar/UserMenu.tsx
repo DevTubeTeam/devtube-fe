@@ -15,7 +15,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const UserMenu: React.FC = () => {
-  const { user, isAuthenticated, isAuthLoading, logout } = useAuth();
+  const { user, isAuthenticated, isAuthLoading } = useAuth();
   const { logoutMutation } = useLogin();
 
   if (isAuthLoading) {

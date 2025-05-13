@@ -1,5 +1,4 @@
-type Props = {};
 
-export const ChannelLayout = (props: Props) => {
+export const ChannelLayout = () => {
   return <div>ChannelLayout</div>;
 };

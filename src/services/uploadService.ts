@@ -143,7 +143,7 @@ const uploadService = {
     partSize: number = 5 * 1024 * 1024 // 5MB default
   ): Promise<ICompleteMultipartUploadPart[]> {
     console.log('Starting multipart upload:', multipartResponse);
-    const { presignedUrls, key, uploadId } = multipartResponse;
+    const { presignedUrls } = multipartResponse;
     const parts: ICompleteMultipartUploadPart[] = [];
 
     await Promise.all(

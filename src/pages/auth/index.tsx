@@ -43,20 +43,24 @@ const LoginPage = () => {
   });
 
   useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const code = query.get('code');
-    console.log(location.pathname, code, 'pathname');
-    if (code && location.pathname === '/auth/silent/callback') {
-      authService
-        .handleSilentCallback(code)
-        .then(response => {
-          setTokens({ ...response.data.data, accessToken: '', refreshToken: '' });
-          navigate(from, { replace: true });
-        })
-        .catch(error => {
+    const handleSilentCallback = async () => {
+      const query = new URLSearchParams(location.search);
+      const code = query.get('code');
+      console.log(location.pathname, code, 'pathname');
+      if (code && location.pathname === '/auth/silent/callback') {
+        try {
+          const response = await authService.handleSilentCallback(code);
+          if (response.data) {
+            setTokens({ ...response.data, accessToken: '', refreshToken: '' });
+            navigate(from, { replace: true });
+          }
+        } catch (error) {
           console.error('Silent callback failed:', error);
-        });
-    }
+        }
+      }
+    };
+
+    handleSilentCallback();
   }, [location, navigate, setTokens, from]);
 
   return (

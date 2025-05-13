@@ -173,12 +173,12 @@ export default function UploadPage() {
     }
   }, [file, idToken, useDeleteVideo]);
 
-  const handleRetry = useCallback(() => {
-    setError(null);
-    setStatus("idle");
-    setProgress(0);
-    handleUpload();
-  }, [handleUpload]);
+  // const handleRetry = useCallback(() => {
+  //   setError(null);
+  //   setStatus("idle");
+  //   setProgress(0);
+  //   handleUpload();
+  // }, [handleUpload]);
 
   const authenticate = useCallback(() => {
     const token = "dummy-id-token"; // Thay bằng logic lấy token thực tế
