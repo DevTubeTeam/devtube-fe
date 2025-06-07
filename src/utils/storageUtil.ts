@@ -1,38 +1,54 @@
 // storageUtil.ts
 
 export const storageUtil = {
-  set<T>(key: string, value: T): void {
+  set<T>(key: string, value: T, days = 7): void {
     try {
-      const json = JSON.stringify(value);
-      localStorage.setItem(key, json);
+      const json = encodeURIComponent(JSON.stringify(value));
+      const expires = new Date(Date.now() + days * 864e5).toUTCString();
+      document.cookie = `${key}=${json}; expires=${expires}; path=/`;
     } catch (error) {
-      console.error(`Error setting ${key} in localStorage`, error);
+      console.error(`Error setting ${key} in cookies`, error);
     }
   },
 
   get<T>(key: string): T | null {
     try {
-      const json = localStorage.getItem(key);
-      return json ? (JSON.parse(json) as T) : null;
+      console.log(`Getting value for key: ${key} from cookies`);
+      const match = document.cookie.match(
+        new RegExp('(?:^|; )' + key.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
+      );
+      if (!match) {
+        console.log(`No cookie found for key: ${key}`);
+        return null;
+      }
+      const value = JSON.parse(decodeURIComponent(match[1])) as T;
+      console.log(`Retrieved value for key: ${key}`, value);
+      return value;
     } catch (error) {
-      console.error(`Error getting ${key} from localStorage`, error);
+      console.error(`Error getting ${key} from cookies`, error);
       return null;
     }
   },
 
   remove(key: string): void {
     try {
-      localStorage.removeItem(key);
+      document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
     } catch (error) {
-      console.error(`Error removing ${key} from localStorage`, error);
+      console.error(`Error removing ${key} from cookies`, error);
     }
   },
 
   clearAll(): void {
     try {
-      localStorage.clear();
+      document.cookie.split(';').forEach(cookie => {
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        if (name) {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+        }
+      });
     } catch (error) {
-      console.error('Error clearing localStorage', error);
+      console.error('Error clearing cookies', error);
     }
   },
 };

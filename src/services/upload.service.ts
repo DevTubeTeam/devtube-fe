@@ -9,7 +9,7 @@ import {
   ISinglePresignedUrlResponse,
 } from '@/types/upload';
 import axios, { AxiosProgressEvent } from 'axios';
-import { api } from './axios';
+import api from './axios';
 
 /**
  * Service for handling file uploads to S3

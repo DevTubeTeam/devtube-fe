@@ -1,6 +1,6 @@
 import API_ENDPOINTS from '@/configs/apiEndpoints';
-import { api } from '@/services/axios';
 import { IVideoMetadata } from '@/types/video';
+import api from './axios';
 
 const videoService = {
   saveVideoMetadata: async (data: IVideoMetadata): Promise<HttpResponse<null>> => {

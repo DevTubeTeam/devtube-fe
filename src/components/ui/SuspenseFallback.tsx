@@ -1,8 +1,8 @@
-import { LoaderContext } from '@/contexts/LoaderContext';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useLoader } from '../../contexts';
 
 const SuspenseFallback = () => {
-  const loaderContext = useContext(LoaderContext);
+  const loaderContext = useLoader();
 
   if (!loaderContext) {
     throw new Error('LoaderContext is undefined. Please ensure it is provided.');

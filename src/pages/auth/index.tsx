@@ -1,86 +1,63 @@
-import { AuthContext } from '@/contexts/AuthContext';
-import useLogin from '@/hooks/useLogin';
-import authService from '@/services/authService';
-import { IGoogleCallbackRequest } from '@/types/auth';
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
-import { useContext, useEffect } from 'react';
+import { GoogleLoginButton } from '@/components/auth';
+import Logo from '@/components/shared/Navbar/Logo';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts';
 
 const LoginPage = () => {
-  const { googleCallbackMutation } = useLogin();
-  const isLoading = googleCallbackMutation.isPending;
-  const { setTokens } = useContext(AuthContext);
-
-  const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
-  const from = (location.state as { from?: Location })?.from?.pathname || '/';
-
-  const login = useGoogleLogin({
-    flow: 'auth-code',
-    onSuccess: response => {
-      const { code } = response;
-
-      console.log('code', code);
-      if (!code) {
-        console.error('No code received');
-        return;
-      }
-
-      const IGoogleCallbackRequest: IGoogleCallbackRequest = {
-        code: code,
-      };
-
-      googleCallbackMutation.mutate(IGoogleCallbackRequest, {
-        onSuccess: () => {
-          navigate(from, { replace: true });
-        },
-      });
-    },
-    onError: () => {
-      console.error('Google login failed');
-    },
-  });
+  const location = useLocation();
 
   useEffect(() => {
-    const handleSilentCallback = async () => {
-      const query = new URLSearchParams(location.search);
-      const code = query.get('code');
-      console.log(location.pathname, code, 'pathname');
-      if (code && location.pathname === '/auth/silent/callback') {
-        try {
-          const response = await authService.handleSilentCallback(code);
-          if (response.data) {
-            setTokens({ ...response.data, accessToken: '', refreshToken: '' });
-            navigate(from, { replace: true });
-          }
-        } catch (error) {
-          console.error('Silent callback failed:', error);
-        }
-      }
-    };
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, location, navigate]);
 
-    handleSilentCallback();
-  }, [location, navigate, setTokens, from]);
+  if (isAuthenticated) return null;
 
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white shadow-lg rounded-lg p-8 text-center">
-          <h1 className="text-2xl font-bold mb-4 text-gray-800">Welcome to DevHub</h1>
-          <p className="text-gray-600 mb-6">Sign in to continue to your account</p>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md space-y-8">
+        {/* Logo and Header */}
+        <div className="flex flex-col items-center justify-center text-center space-y-2">
+          <div className="mb-4">
+            <Logo />
+          </div>
+          <h1 className="text-2xl font-bold">Welcome to DevTube</h1>
+          <p className="text-muted-foreground">Sign in to continue to your account</p>
+        </div>
 
-          <button
-            onClick={() => login()}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Sign in with Google
-          </button>
+        {/* Login Card */}
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-xl">Sign in</CardTitle>
+            <CardDescription>
+              Choose your preferred sign in method
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+              <GoogleLoginButton />
+            </GoogleOAuthProvider>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <div className="text-xs text-center text-muted-foreground">
+              By continuing, you agree to DevTube's Terms of Service and Privacy Policy
+            </div>
+          </CardFooter>
+        </Card>
 
-          {isLoading && <p>Loading...</p>}
+        {/* Footer */}
+        <div className="text-center text-sm text-muted-foreground">
+          <p>Don't have an account? Contact your administrator</p>
         </div>
       </div>
-    </GoogleOAuthProvider>
+    </div>
   );
 };
 

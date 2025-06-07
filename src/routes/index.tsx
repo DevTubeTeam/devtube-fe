@@ -1,4 +1,4 @@
-import { RedirectIfAuthenticated, RequireRole } from '@/components/guards';
+import { ProtectedRoute } from '@/components/auth';
 import { ROUTES } from '@/constants/routes';
 import { UploadProvider } from '@/contexts/UploadContext';
 import { AdminLayout, ChannelLayout, DashboardLayout, HomeFeedLayout, PublicLayout, WatchLayout } from '@/layouts';
@@ -7,14 +7,14 @@ import { RouteObject } from 'react-router-dom';
 
 // Public routes
 const Home = lazy(() => import('@/pages/home'));
-const Login = lazy(() => import('@/pages/auth'));
+const Login = lazy(() => import('@/pages/auth'))
 const Search = lazy(() => import('@/pages/search'));
 const Explore = lazy(() => import('@/pages/explore'));
 const Watch = lazy(() => import('@/pages/watch'));
 const Channel = lazy(() => import('@/pages/channel'));
-// const SilentCallback = lazy(() => import('@/pages/auth/silent'));
 
 // Authenticated routes
+const Dashboard = lazy(() => import('@/pages/dashboard'));
 const MyVideos = lazy(() => import('@/pages/dashboard/videos'));
 const EditVideo = lazy(() => import('@/pages/dashboard/videos/edit'));
 const UploadVideo = lazy(() => import('@/pages/dashboard/upload'));
@@ -53,34 +53,34 @@ export const appRoutes: RouteObject[] = [
       },
     ],
   },
-
   // Authenticated routes
   {
     path: ROUTES.DASHBOARD,
     element: (
-      <DashboardLayout />
+      <ProtectedRoute role='user'>
+        <DashboardLayout />
+      </ProtectedRoute>
+
     ),
     children: [
-      { path: '', element: <MyVideos /> },
+      { path: '', element: <Dashboard /> },
       { path: 'videos', element: <MyVideos /> },
       { path: 'videos/edit/:id', element: <EditVideo /> },
       {
         path: 'upload', element: <UploadProvider>
           <UploadVideo />
         </UploadProvider>
-      },
-      { path: 'playlists', element: <Playlists /> },
+      }, { path: 'playlists', element: <Playlists /> },
       { path: 'settings', element: <UserSettings /> },
     ],
   },
-
   // Admin routes
   {
     path: ROUTES.ADMIN,
     element: (
-      <RequireRole role="admin">
+      <ProtectedRoute role='admin'>
         <AdminLayout />
-      </RequireRole>
+      </ProtectedRoute>
     ),
     children: [
       { path: '', element: <AdminUsers /> },
@@ -90,18 +90,11 @@ export const appRoutes: RouteObject[] = [
       { path: 'settings', element: <AdminSettings /> },
     ],
   },
-
   // Auth route
   {
     path: ROUTES.AUTH.slice(1),
     element: (
-      <RedirectIfAuthenticated>
-        <Login />
-      </RedirectIfAuthenticated>
+      <Login />
     ),
-  },
-  // {
-  //   path: ROUTES.AUTH_SILENT.slice(1),
-  //   element: <SilentCallback />,
-  // },
+  }
 ];

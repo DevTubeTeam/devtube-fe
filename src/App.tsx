@@ -9,7 +9,8 @@ function App() {
   return <>
     <ScrollToTop />
     <Suspense fallback={<SuspenseFallback />}>{routes}</Suspense>
-    </>;
+    <ScrollToTop />
+  </>;
 }
 
 export default App;

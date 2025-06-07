@@ -8,24 +8,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown';
 
-import { useAuth } from '@/hooks';
-import useLogin from '@/hooks/useLogin';
-import { ILogoutRequest } from '@/types/auth';
+import { useAuth } from '@/contexts';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const UserMenu: React.FC = () => {
-  const { user, isAuthenticated, isAuthLoading } = useAuth();
-  const { logoutMutation } = useLogin();
-
-  if (isAuthLoading) {
-    return <div>Loading...</div>; // hoặc null
-  }
+  const { user, isAuthenticated, handleLogout, isLoggingOut } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated || !user) {
     return (
       <div className="flex gap-2">
-        <Link to="/auth">
+        <Link to="/auth" state={{ from: location }}>
           <Button variant="outline" size="sm">
             Sign In
           </Button>
@@ -34,14 +28,6 @@ const UserMenu: React.FC = () => {
     );
   }
 
-  const handleLogout = () => {
-    if (user) {
-      const payload: ILogoutRequest = {
-        userId: user.id,
-      };
-      logoutMutation.mutate(payload);
-    }
-  };
 
   return (
     <div className="flex items-center gap-2">
@@ -63,7 +49,7 @@ const UserMenu: React.FC = () => {
           <DropdownMenuItem onClick={() => console.log('Navigate to settings')}>Settings</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>
-            {logoutMutation.isPending ? 'Logging out...' : 'Log out'}
+            {isLoggingOut ? 'Logging out...' : 'Log out'}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
