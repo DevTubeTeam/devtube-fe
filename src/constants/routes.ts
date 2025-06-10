@@ -2,7 +2,7 @@ export const ROUTES = {
   HOME: '/',
   EXPLORE: '/explore',
   SEARCH: '/search',
-  VIDEO: '/video',
+  VIDEO: '/video/:videoId',
   CHANNEL: (id: string = ':id') => `/channel/${id}`,
 
   AUTH: '/auth',

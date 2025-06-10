@@ -10,9 +10,8 @@ import {
   LogOut,
   Menu,
   MessageSquare,
-  Search,
   Settings,
-  User,
+  User
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -163,16 +162,6 @@ export const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="flex h-10 w-64 items-center rounded-full border px-3">
-                <Search className="h-4 w-4 text-gray-400" />
-                <input
-                  type="search"
-                  placeholder="Tìm kiếm"
-                  className="ml-2 w-full bg-transparent outline-none"
-                />
-              </div>
-            </div>
             <ModeToggle />
             <button className="rounded-full p-2 hover:bg-gray-100">
               <Bell size={20} />

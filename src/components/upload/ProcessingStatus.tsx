@@ -1,13 +1,27 @@
+import { VideoProcessingStatus } from '@/hooks/useUpload';
 import { Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { useUploadContext } from '../../contexts/UploadContext';
 
 interface ProcessingStatusProps {
+    status?: VideoProcessingStatus;
     onComplete?: () => void;
 }
 
 export const ProcessingStatus: React.FC<ProcessingStatusProps> = ({
+    status = 'processing',
     onComplete,
 }) => {
+    const { metadata } = useUploadContext();
+
+    if (status === 'failed' && metadata?.transcode_error) {
+        return (
+            <div className="text-center text-red-500">
+                Processing failed: {metadata.transcode_error}
+            </div>
+        );
+    }
+
     const [currentStage, setCurrentStage] = useState(0);
     const stages = [
         'Checking for copyright issues',

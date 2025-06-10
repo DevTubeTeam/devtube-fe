@@ -1,124 +1,151 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { IUpdateVideoMetadataRequest, IVideoFile, VidPrivacy, VideoLifecycle } from '@/types/video';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { ThumbnailSelector } from './ThumbnailSelector';
 import { VisibilitySelector } from './VisibilitySelector';
 
 interface VideoMetadataFormProps {
-    initialData: {
-        title: string;
-        description: string;
-        thumbnail: string;
-        playlist: string;
-        audience: string;
-        visibility: string;
-        tags: string[];
-        category: string;
-    };
-    selectedFile: File | null;
-    uploadProgress: number;
-    onSubmit: (data: any) => void;
+    initialData: Partial<IUpdateVideoMetadataRequest>;
+    file: IVideoFile | null;
+    videoId: string;
+    onSubmit: (data: IUpdateVideoMetadataRequest) => void;
+    onCancel?: () => void;
+    isUploading?: boolean;
 }
 
-interface FormValues {
-    title: string;
-    description: string;
-    thumbnail: string;
-    playlist: string;
-    audience: string;
-    visibility: string;
-    tags: string[];
-    category: string;
+interface FormValues extends IUpdateVideoMetadataRequest {
+    tagsInput?: string;
 }
 
-// Define Yup validation schema
 const VideoMetadataSchema = Yup.object().shape({
     title: Yup.string()
         .required('Title is required')
         .max(100, 'Title must be less than 100 characters'),
-    description: Yup.string()
-        .max(5000, 'Description must be less than 5000 characters'),
-    audience: Yup.string()
-        .required('Please specify if this content is made for kids'),
-    visibility: Yup.string()
-        .required('Please select visibility')
+    description: Yup.string().max(5000, 'Description must be less than 5000 characters'),
+    category: Yup.string(),
+    privacy: Yup.number().oneOf([VidPrivacy.PUBLIC, VidPrivacy.PRIVATE, VidPrivacy.UNLISTED]),
+    tags: Yup.array().of(Yup.string())
 });
 
 export const VideoMetadataForm: React.FC<VideoMetadataFormProps> = ({
     initialData,
-    selectedFile,
-    uploadProgress,
+    file,
+    videoId,
     onSubmit,
+    onCancel,
+    isUploading
 }) => {
     const [tagsInput, setTagsInput] = useState('');
 
-    // Generate initial form values from file name if needed
-    useEffect(() => {
-        if (selectedFile && !initialData.title) {
-            const fileName = selectedFile.name.replace(/\.[^/.]+$/, "");
-            initialData.title = fileName;
-        }
-    }, [selectedFile, initialData]);
+    const safeInitialValues: FormValues = {
+        title: initialData.title || '',
+        description: initialData.description || '',
+        thumbnailUrl: initialData.thumbnailUrl || '',
+        tags: initialData.tags || [],
+        category: initialData.category || '',
+        privacy: initialData.privacy || VidPrivacy.PRIVATE,
+        publishAt: initialData.publishAt || '',
+        lifecycle: initialData.lifecycle || VideoLifecycle.DRAFT,
+        tagsInput: ''
+    };
 
-    const handleAddTag = (values: FormValues, setFieldValue: FormikHelpers<FormValues>['setFieldValue']) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const categories = [
+        'Education',
+        'Entertainment',
+        'Gaming',
+        'Music',
+        'Science & Technology',
+        'Sports',
+        'Travel',
+        'Other'
+    ];
+
+    const handleAddTag = (
+        values: FormValues,
+        setFieldValue: FormikHelpers<FormValues>['setFieldValue']
+    ) => (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && tagsInput.trim()) {
             e.preventDefault();
             const newTag = tagsInput.trim();
-            if (!values.tags.includes(newTag)) {
-                setFieldValue('tags', [...values.tags, newTag]);
+            if (!values.tags?.includes(newTag)) {
+                setFieldValue('tags', [...(values.tags || []), newTag]);
             }
             setTagsInput('');
         }
     };
 
-    const handleRemoveTag = (tag: string, values: FormValues, setFieldValue: FormikHelpers<FormValues>['setFieldValue']) => {
-        setFieldValue('tags', values.tags.filter((t: string) => t !== tag));
+    const handleRemoveTag = (
+        tag: string,
+        values: FormValues,
+        setFieldValue: FormikHelpers<FormValues>['setFieldValue']
+    ) => {
+        setFieldValue('tags', values.tags?.filter((t: string) => t !== tag));
     };
 
-    const handleThumbnailChange = (thumbnailUrl: string, setFieldValue: FormikHelpers<FormValues>['setFieldValue']) => {
-        setFieldValue('thumbnail', thumbnailUrl);
+    const handleSubmit = useCallback(
+        (values: FormValues, actions: FormikHelpers<FormValues>) => {
+            const data: IUpdateVideoMetadataRequest = {
+                title: values.title,
+                description: values.description,
+                thumbnailUrl: values.thumbnailUrl,
+                tags: values.tags,
+                category: values.category,
+                privacy: values.privacy,
+                publishAt: values.publishAt,
+                lifecycle: initialData.lifecycle || VideoLifecycle.DRAFT
+            };
+
+            // Mock data handling
+            console.log('Mock saving metadata:', data);
+            toast.success('Metadata saved successfully (mock)');
+
+            // Call onSubmit to move to the next step in UploadModal
+            onSubmit(data);
+            actions.setSubmitting(false);
+        },
+        [onSubmit, initialData]
+    );
+
+    const handleUploadThumbnail = (thumbnailFile: File, setFieldValue: any) => {
+        // Mock thumbnail upload
+        console.log('Mock uploading thumbnail:', thumbnailFile.name);
+
+        // Simulate successful upload with a mock URL
+        setTimeout(() => {
+            const mockThumbnailUrl = `https://example.com/thumbnails/mock-${Date.now()}.jpg`;
+            setFieldValue('thumbnailUrl', mockThumbnailUrl);
+            toast.success('Thumbnail uploaded (mock)');
+        }, 1000);
     };
-
-    const playlists = [
-        { id: 'none', name: 'None' },
-        { id: 'favorites', name: 'Favorites' },
-        { id: 'watchLater', name: 'Watch Later' },
-        { id: 'newPlaylist', name: '+ Create new playlist' }
-    ];
-
-    const categories = [
-        'Education', 'Entertainment', 'Gaming', 'Music',
-        'Science & Technology', 'Sports', 'Travel', 'Other'
-    ];
 
     return (
         <Formik
-            initialValues={initialData}
+            initialValues={safeInitialValues}
             validationSchema={VideoMetadataSchema}
-            onSubmit={onSubmit}
+            onSubmit={handleSubmit}
         >
-            {({ values, isValid, setFieldValue }) => (
+            {({ values, isValid, setFieldValue, isSubmitting }) => (
                 <Form className="space-y-6 py-4">
-                    {/* Thumbnail selector */}
                     <div className="space-y-2">
                         <Label>Thumbnail</Label>
                         <ThumbnailSelector
-                            videoFile={selectedFile}
-                            currentThumbnail={values.thumbnail}
-                            onChange={(url) => handleThumbnailChange(url, setFieldValue)}
+                            videoFile={file}
+                            currentThumbnail={values.thumbnailUrl || ''}
+                            onChange={(url) => setFieldValue('thumbnailUrl', url)}
+                            onUpload={(thumbnailFile) => handleUploadThumbnail(thumbnailFile, setFieldValue)}
                         />
                         <p className="text-sm text-muted-foreground">
                             Select or upload a picture that shows what's in your video
                         </p>
                     </div>
 
-                    {/* Title */}
                     <div className="space-y-2">
                         <Label htmlFor="title">Title (required)</Label>
                         <Field
@@ -133,12 +160,11 @@ export const VideoMetadataForm: React.FC<VideoMetadataFormProps> = ({
                                 <ErrorMessage name="title" />
                             </div>
                             <div className="text-xs text-muted-foreground text-right">
-                                {values.title.length}/100
+                                {values.title && values.title.length}/100
                             </div>
                         </div>
                     </div>
 
-                    {/* Description */}
                     <div className="space-y-2">
                         <Label htmlFor="description">Description</Label>
                         <Field
@@ -153,63 +179,16 @@ export const VideoMetadataForm: React.FC<VideoMetadataFormProps> = ({
                         </div>
                     </div>
 
-                    {/* Playlist */}
-                    <div className="space-y-2">
-                        <Label htmlFor="playlist">Playlist</Label>
-                        <Select
-                            value={values.playlist}
-                            onValueChange={(value) => setFieldValue('playlist', value)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Add to playlist" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {playlists.map(playlist => (
-                                    <SelectItem key={playlist.id} value={playlist.id}>
-                                        {playlist.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Audience - Is this made for kids? */}
-                    <div className="space-y-3">
-                        <Label>Audience</Label>
-                        <p className="text-sm text-muted-foreground">
-                            Is this content made for kids? (required)
-                        </p>
-                        <RadioGroup
-                            value={values.audience}
-                            onValueChange={(value) => setFieldValue('audience', value)}
-                        >
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="not-for-kids" id="not-for-kids" />
-                                <Label htmlFor="not-for-kids">No, it's not made for kids</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="for-kids" id="for-kids" />
-                                <Label htmlFor="for-kids">Yes, it's made for kids</Label>
-                            </div>
-                        </RadioGroup>
-                        <div className="text-xs text-red-500">
-                            <ErrorMessage name="audience" />
-                        </div>
-                    </div>
-
-                    {/* Visibility */}
                     <div className="space-y-2">
                         <Label>Visibility</Label>
                         <VisibilitySelector
-                            value={values.visibility}
-                            onChange={(value) => setFieldValue('visibility', value)}
+                            value={String(values.privacy)}
+                            onChange={(value) =>
+                                setFieldValue('privacy', VidPrivacy[value.toUpperCase() as keyof typeof VidPrivacy])
+                            }
                         />
-                        <div className="text-xs text-red-500">
-                            <ErrorMessage name="visibility" />
-                        </div>
                     </div>
 
-                    {/* Tags */}
                     <div className="space-y-2">
                         <Label htmlFor="tags">Tags</Label>
                         <div>
@@ -221,8 +200,11 @@ export const VideoMetadataForm: React.FC<VideoMetadataFormProps> = ({
                                 placeholder="Add tags (press Enter after each tag)"
                             />
                             <div className="flex flex-wrap gap-2 mt-2">
-                                {values.tags.map(tag => (
-                                    <div key={tag} className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm flex items-center">
+                                {values.tags && values.tags.map((tag: string) => (
+                                    <div
+                                        key={tag}
+                                        className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm flex items-center"
+                                    >
                                         {tag}
                                         <button
                                             type="button"
@@ -237,7 +219,6 @@ export const VideoMetadataForm: React.FC<VideoMetadataFormProps> = ({
                         </div>
                     </div>
 
-                    {/* Category */}
                     <div className="space-y-2">
                         <Label htmlFor="category">Category</Label>
                         <Select
@@ -248,7 +229,7 @@ export const VideoMetadataForm: React.FC<VideoMetadataFormProps> = ({
                                 <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent>
-                                {categories.map(category => (
+                                {categories.map((category) => (
                                     <SelectItem key={category} value={category.toLowerCase()}>
                                         {category}
                                     </SelectItem>
@@ -257,13 +238,14 @@ export const VideoMetadataForm: React.FC<VideoMetadataFormProps> = ({
                         </Select>
                     </div>
 
-                    {/* Submit button - enabled when upload progress is at least 50% */}
-                    <div className="flex justify-end">
-                        <Button
-                            type="submit"
-                            disabled={uploadProgress < 50 || !isValid || !values.title || !values.audience}
-                        >
-                            Next
+                    <div className="flex justify-between">
+                        {isUploading && onCancel && (
+                            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+                                Cancel Upload
+                            </Button>
+                        )}
+                        <Button className='text-right' type="submit" disabled={!isValid || isSubmitting || !values.title}>
+                            {isUploading ? 'Save Details' : 'Next'}
                         </Button>
                     </div>
                 </Form>

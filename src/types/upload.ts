@@ -1,4 +1,3 @@
-import { IVideoFile } from "./video";
 
 export interface UploadVideoResponse {
   success: boolean;
@@ -6,78 +5,75 @@ export interface UploadVideoResponse {
   message?: string;
 }
 
-export interface UploadVideoParams {
-  file: File;
-  // metadata: VideoMetadata;
-  onProgress?: (progress: number) => void;
-}
-
-export interface IPresignedUrlRequest {
-  idToken: string;
+export interface IThumbnailPresignedUrlRequest {
+  videoId: string;
   fileName: string;
   fileType: string;
 }
 
-
-export interface ISinglePresignedUrlResponse {
+export interface IThumbnailPresignedUrlResponse {
   presignedUrl: string;
   key: string;
   bucketName: string;
 }
 
-export interface IMultipartPresignedUrlResponse {
+export interface IUpdateThumbnailRequest {
+  videoId: string;
+  thumbnailUrl: string;
+}
+
+export interface IUpdateThumbnailResponse {
+  id: string;
+  thumbnailUrl: string;
+}
+
+export interface IPresignedUrlRequest {
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+}
+
+export interface IPresignedUrlResponse {
   uploadId: string;
   key: string;
   bucketName: string;
   presignedUrls: string[];
 }
 
+export interface INotifyUploadingRequest {
+  key: string;
+}
 
-export interface IAbortMultipartUpload {
+export interface IAbortUploadRequest {
   key: string;
   uploadId: string;
-  idToken: string;
 }
-
-export interface IDeleteObjectPayload {
+export interface IAbortUploadResponse {
   key: string;
-  idToken: string;
+  aborted: boolean;
 }
 
-export interface IPresignedUrlPayload {
-  fileName: string;
-  fileType: string;
-  idToken: string;
-  fileSize: number;
-  userId: string;
+export interface IDeleteObjectRequest {
+  videoId: string;
 }
 
-export interface ICompleteMultipartUploadPart {
+export interface IDeleteObjectResponse {
+  id: string;
+  deleted: boolean;
+}
+
+export interface ICompleteUploadPart {
   PartNumber: number;
   ETag: string;
 }
 
-export interface ICompleteMultipartUploadPayload {
+export interface ICompleteUploadRequest {
   key: string;
   uploadId: string;
-  parts: ICompleteMultipartUploadPart[];
-  idToken: string;
+  parts: ICompleteUploadPart[];
 }
 
-export interface UploadParams {
-  file: IVideoFile;
-  idToken: string;
-}
-
-export interface UploadResult {
-  videoFile: IVideoFile;
-}
-
-export interface UploadOptions {
-  onProgress?: (progress: number) => void;
-}
-
-export interface UploadStep {
-  label: string;
-  index: number;
+export interface ICompleteUploadResponse {
+  location: string;
+  key: string;
 }

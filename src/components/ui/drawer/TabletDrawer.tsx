@@ -13,7 +13,7 @@ interface TabletDrawerProps {
 const TabletDrawer = ({ className, children, trigger }: TabletDrawerProps) => {
   return (
     <Sheet>
-      <SheetTrigger asChild>
+      <SheetTrigger>
         {trigger || (
           <Button variant="ghost" size="icon" className="lg:hidden">
             <Menu />

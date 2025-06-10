@@ -1,3 +1,8 @@
+const API_BASES = {
+  VIDEO: '/video',
+  UPLOAD: '/upload',
+};
+
 const API_ENDPOINTS = {
   AUTH: {
     GOOGLE: '/auth/google',
@@ -13,20 +18,20 @@ const API_ENDPOINTS = {
     SETTINGS: '/user/settings',
   },
   VIDEO: {
-    BASE: '/videos',
-    SAVE_METADATA: '/videos/save-metadata',
-    GET_ALL: '/videos/all',
-    GET_BY_ID: (id: string) => `/videos/${id}`,
-    UPDATE_BY_ID: (id: string) => `/videos/${id}`,
-    DELETE_BY_ID: (id: string) => `/videos/${id}`,
-    DETAILS: (id: string) => `/videos/${id}`
-  },
-  UPLOAD: {
-    BASE: '/upload',
-    ABORT: '/upload/abort',
-    DELETE: '/upload/delete-file',
-    PRESIGNED_URL: '/upload/presign-url',
-    COMPLETE_MULTIPART_UPLOAD: '/upload/complete-multipart-upload',
+    BASE: API_BASES.VIDEO,
+    GET_PRESIGNED_URL: `${API_BASES.VIDEO}/presign`,
+    NOTIFY_UPLOADING: `${API_BASES.VIDEO}/uploading`,
+    COMPLETE_UPLOAD: `${API_BASES.VIDEO}/complete`,
+    ABORT_UPLOAD: `${API_BASES.VIDEO}/abort`,
+    DELETE_VIDEO: `${API_BASES.VIDEO}/delete`,
+    MY_VIDEOS: `${API_BASES.VIDEO}/my-videos`,
+    CREATE_THUMBNAIL_PRESIGNED_URL: `${API_BASES.VIDEO}/thumbnail/presign`,
+    COMPLETE_THUMBNAIL_UPLOAD: `${API_BASES.VIDEO}/thumbnail/complete`,
+    getById: (id: string) => `${API_BASES.VIDEO}/${id}`,
+    updateById: (id: string) => `${API_BASES.VIDEO}/${id}`,
+    deleteById: (id: string) => `${API_BASES.VIDEO}/${id}`,
+    getStatusById: (id: string) => `${API_BASES.VIDEO}/status/${id}`,
+    publishVideo: (id: string) => `${API_BASES.VIDEO}/publish/${id}`,
   }
 };
 

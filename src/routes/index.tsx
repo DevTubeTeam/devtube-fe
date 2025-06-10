@@ -67,9 +67,10 @@ export const appRoutes: RouteObject[] = [
       { path: 'videos', element: <MyVideos /> },
       { path: 'videos/edit/:id', element: <EditVideo /> },
       {
-        path: 'upload', element: <UploadProvider>
-          <UploadVideo />
-        </UploadProvider>
+        path: 'upload', element:
+          <UploadProvider>
+            <UploadVideo />
+          </UploadProvider>
       }, { path: 'playlists', element: <Playlists /> },
       { path: 'settings', element: <UserSettings /> },
     ],

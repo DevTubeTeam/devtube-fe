@@ -1,7 +1,12 @@
 import VideoPlayer from '@/components/video/VideoPlayer';
+import { useParams } from 'react-router-dom';
 
 const WatchPage = () => {
-  const videoUrl = `https://d1bapesvzv4qyl.cloudfront.net/processed/e6295a62-c7cb-4184-8a90-52e09607c363/index.m3u8`;
+  // get video id param
+  const { videoId } = useParams<{ videoId: string }>();
+
+
+  const videoUrl = `https://d1bapesvzv4qyl.cloudfront.net/processed/${videoId}/index.m3u8`;
 
   return (
     <div className="max-w-4xl mx-auto p-4">

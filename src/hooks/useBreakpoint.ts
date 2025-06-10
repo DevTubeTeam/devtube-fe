@@ -34,33 +34,37 @@ export const useBreakpoint = () => {
       window.removeEventListener('resize', handleResize);
   }, []);
 
-  return breakpoint;
+  return {
+    breakpoint,
+    isMobile: breakpoint === 'sm',
+    isTablet: breakpoint === 'md',
+    isDesktop: breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl',
+  };
 };
 
 export const useIsMobile = () => {
-  const bp = useBreakpoint();
-  return bp === 'sm';
+  const { isMobile } = useBreakpoint();
+  return isMobile;
 };
 
 export const useIsTablet = () => {
-  const bp = useBreakpoint();
-  return bp === 'md';
+  const { isTablet } = useBreakpoint();
+  return isTablet;
 };
 
 export const useIsDesktop = () => {
-  const bp = useBreakpoint();
-  // desktop từ lg trở lên
-  return bp === 'lg' || bp === 'xl' || bp === '2xl';
+  const { isDesktop } = useBreakpoint();
+  return isDesktop;
 };
 
 export const useIsLargerThan = (bpKey: BreakpointKey) => {
-  const bp = useBreakpoint();
+  const { breakpoint } = useBreakpoint();
   const keys = Object.keys(BREAKPOINTS) as BreakpointKey[];
-  return keys.indexOf(bp) > keys.indexOf(bpKey);
+  return keys.indexOf(breakpoint) > keys.indexOf(bpKey);
 };
 
 export const useIsSmallerThan = (bpKey: BreakpointKey) => {
-  const bp = useBreakpoint();
+  const { breakpoint } = useBreakpoint();
   const keys = Object.keys(BREAKPOINTS) as BreakpointKey[];
-  return keys.indexOf(bp) < keys.indexOf(bpKey);
+  return keys.indexOf(breakpoint) < keys.indexOf(bpKey);
 };

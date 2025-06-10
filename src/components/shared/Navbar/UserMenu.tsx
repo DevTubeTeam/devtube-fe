@@ -33,13 +33,13 @@ const UserMenu: React.FC = () => {
     <div className="flex items-center gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <div className="flex items-center gap-2 cursor-pointer">
+          <button className="flex items-center gap-2 cursor-pointer" type="button">
             <Avatar className="h-8 w-8">
               <AvatarImage src={user?.avatarUrl || ''} alt={user?.displayName || 'User'} />
               <AvatarFallback>{user?.displayName?.substring(0, 2) || '??'}</AvatarFallback>
             </Avatar>
             <span className="hidden md:inline">{user.displayName}</span>
-          </div>
+          </button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="ml-1">
