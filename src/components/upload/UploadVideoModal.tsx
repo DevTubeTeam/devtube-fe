@@ -55,7 +55,7 @@ export function UploadVideoModal({ isOpen, onClose }: UploadVideoModalProps) {
     // 2. VideoProcessingStatus: 'pending' | 'uploading' | 'processing' | 'ready' | 'failed' | 'cancelled' - Trạng thái xử lý video
     const {
         file,
-        uploadProgress,
+        // uploadProgress,
         smoothUploadProgress,
         error,
         processingStatus,

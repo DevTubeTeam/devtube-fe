@@ -37,7 +37,6 @@ const VideoMetadataSchema = Yup.object().shape({
 export const VideoMetadataForm: React.FC<VideoMetadataFormProps> = ({
     initialData,
     file,
-    videoId,
     onSubmit,
     onCancel,
     isUploading

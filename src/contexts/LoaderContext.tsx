@@ -8,7 +8,7 @@ export interface LoaderContextProps {
   message: string;
 }
 
-const LoaderContext = createContext<LoaderContextProps | undefined>(undefined);
+export const LoaderContext = createContext<LoaderContextProps | undefined>(undefined);
 
 export const useLoader = (): LoaderContextProps => {
   const loaderContext = useContext(LoaderContext);

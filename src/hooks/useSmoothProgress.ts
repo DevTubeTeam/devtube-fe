@@ -17,7 +17,7 @@ export function useSmoothProgress({
     minStep = 0.5,
     maxStep = 2,
     smoothingFactor = 0.8,
-    processingPhaseWeight = 20
+    // processingPhaseWeight = 20
 }: UseSmoothProgressOptions = {}) {
     // Actual raw progress value (0-100)
     const [progress, setProgress] = useState<number>(initialValue);
