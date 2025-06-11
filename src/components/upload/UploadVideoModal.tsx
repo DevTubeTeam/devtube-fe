@@ -68,7 +68,8 @@ export function UploadVideoModal({ isOpen, onClose }: UploadVideoModalProps) {
         reset,
         cancelCurrentUpload,
         publishVideo,
-        metadata
+        metadata,
+        updateVideoMetadata
     } = useUploadContext();
 
     // Reset state khi đóng modal
@@ -122,29 +123,42 @@ export function UploadVideoModal({ isOpen, onClose }: UploadVideoModalProps) {
 
     // Xử lý submit form
     const handleSubmit = async () => {
-        if (canSaveMetadata && localMetadata && localMetadata.title) {
+        if (canSaveMetadata && localMetadata && localMetadata.title && metadata?.id) {
             const metadataToSave = {
                 ...localMetadata,
                 lifecycle: shouldPublish ? VideoLifecycle.PUBLISHED : VideoLifecycle.DRAFT
             } as IVideoMetadata;
 
-            // Lưu metadata
-            setMetadata(metadataToSave);
+            try {
+                // Cập nhật metadata lên server
+                await updateVideoMetadata.mutateAsync({
+                    videoId: metadata.id,
+                    metadata: {
+                        title: metadataToSave.title,
+                        description: metadataToSave.description,
+                        tags: metadataToSave.tags,
+                        category: metadataToSave.category,
+                        privacy: metadataToSave.privacy,
+                        lifecycle: metadataToSave.lifecycle
+                    }
+                });
 
-            // Nếu user chọn publish video, gọi API publish video
-            if (shouldPublish && metadata?.id) {
-                try {
+                // Cập nhật metadata trong context
+                setMetadata(metadataToSave);
+
+                // Nếu user chọn publish video, gọi API publish video
+                if (shouldPublish) {
                     await publishVideo.mutateAsync({
                         videoId: metadata.id,
                         publishAt: new Date().toISOString()
                     });
                     console.log('Video đã được xuất bản thành công!');
-                } catch (error) {
-                    console.error('Lỗi khi xuất bản video:', error);
                 }
-            }
 
-            onClose();
+                onClose();
+            } catch (error) {
+                console.error('Lỗi khi cập nhật metadata:', error);
+            }
         }
     };
 

@@ -22,14 +22,6 @@ const MyVideosPage = () => {
   const { useMyVideos } = useVideo();
   const { data: myVideos, isLoading: isMyVideosLoading, error } = useMyVideos();
 
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-600">Error loading videos: {error.message}</p>
-      </div>
-    );
-  }
-
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const openUpload = searchParams.get('openUpload');
@@ -132,7 +124,11 @@ const MyVideosPage = () => {
         setSortOption={setSortOption}
       />
 
-      {isMyVideosLoading ? (
+      {error ? (
+        <div className="text-center py-12">
+          <p className="text-red-600">Error loading videos: {error.message}</p>
+        </div>
+      ) : isMyVideosLoading ? (
         <VideoGrid isLoading={true} videos={[]} />
       ) : filteredAndSortedVideos?.length === 0 ? (
         <VideoEmptyState searchQuery={searchQuery} handleOpenUploadModal={handleOpenUploadModal} />
@@ -145,7 +141,6 @@ const MyVideosPage = () => {
 
       <UploadProvider>
         <UploadVideoModal isOpen={isUploadModalOpen} onClose={handleCloseUploadModal} />
-        {/* <UploadModal isOpen={isUploadModalOpen} onClose={handleCloseUploadModal} /> */}
       </UploadProvider>
     </div>
   );
