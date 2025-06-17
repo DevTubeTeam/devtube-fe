@@ -8,26 +8,28 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown';
 
+import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/contexts';
+import { BookmarkIcon, FolderIcon, LayoutDashboard, LogOut, User, VideoIcon } from 'lucide-react';
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const UserMenu: React.FC = () => {
   const { user, isAuthenticated, handleLogout, isLoggingOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   if (!isAuthenticated || !user) {
     return (
       <div className="flex gap-2">
         <Link to="/auth" state={{ from: location }}>
           <Button variant="outline" size="sm">
-            Sign In
+            Đăng nhập
           </Button>
         </Link>
       </div>
     );
   }
-
 
   return (
     <div className="flex items-center gap-2">
@@ -43,13 +45,39 @@ const UserMenu: React.FC = () => {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="ml-1">
-          <DropdownMenuItem onClick={() => console.log('Navigate to profile')}>My Profile</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => console.log('Navigate to videos')}>My Videos</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => console.log('Navigate to saved')}>Saved</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => console.log('Navigate to settings')}>Settings</DropdownMenuItem>
+          {/* Thông tin cá nhân */}
+          <DropdownMenuItem onClick={() => navigate(`${ROUTES.DASHBOARD}/profile`)}>
+            <User className="mr-2 h-4 w-4" />
+            Trang cá nhân
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
-            {isLoggingOut ? 'Logging out...' : 'Log out'}
+
+          {/* Quản lý nội dung */}
+          <DropdownMenuItem onClick={() => navigate(ROUTES.DASHBOARD)}>
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Studio của tôi
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate(`${ROUTES.DASHBOARD}/videos`)}>
+            <VideoIcon className="mr-2 h-4 w-4" />
+            Video của tôi
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+
+          {/* Nội dung đã lưu */}
+          <DropdownMenuItem onClick={() => navigate(`${ROUTES.DASHBOARD}/playlists`)}>
+            <FolderIcon className="mr-2 h-4 w-4" />
+            Danh sách phát
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate(`${ROUTES.DASHBOARD}/saved`)}>
+            <BookmarkIcon className="mr-2 h-4 w-4" />
+            Video đã lưu
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+
+          {/* Đăng xuất */}
+          <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+            <LogOut className="mr-2 h-4 w-4" />
+            {isLoggingOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

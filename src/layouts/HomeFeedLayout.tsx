@@ -1,47 +1,18 @@
-import NavBar from '@/components/shared/Navbar';
-import DesktopDrawer from '@/components/ui/drawer/DesktopDrawer';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { useIsDesktop, useIsMobile, useIsTablet } from '@/hooks/useBreakpoint';
-import { useState } from 'react';
+import DesktopDrawer from '@/components/shared/Drawer/DesktopDrawer';
 import { Outlet } from 'react-router-dom';
 
 export function HomeFeedLayout() {
-  const isMobile = useIsMobile();
-  const isTablet = useIsTablet();
-  const isDesktop = useIsDesktop();
-  const [drawerOpen, setDrawerOpen] = useState(false); // 💡 State cho Sheet
-
   return (
-    <div className="flex flex-col md:flex-row w-full h-screen overflow-hidden">
-      {/* NavBar */}
-      {(isMobile || isTablet) && (
-        <NavBar openCloseHomeDrawer={() => setDrawerOpen(true)} /> // 💡 truyền hàm toggle
-      )}
-
-      {/* Desktop sidebar */}
-      {isDesktop && (
-        <aside className="w-80 h-full overflow-y-auto">
-          <DesktopDrawer />
-        </aside>
-      )}
-
-      {/* Mobile & Tablet Drawer */}
-      {(isTablet || isMobile) && (
-        <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <SheetContent side="left" className="w-64">
-            <DesktopDrawer />
-          </SheetContent>
-        </Sheet>
-      )}
-
+    <div className="flex flex-col md:flex-row w-full h-full min-h-screen overflow-hidden">
+      <aside className="w-80 h-full overflow-y-auto">
+        <DesktopDrawer />
+      </aside>
       {/* Main content */}
-      <main
-        className={`flex-1 h-full overflow-y-auto ${isMobile ? 'px-2 py-4' : 'px-6 py-8'} ${
-          isMobile ? 'text-sm' : isTablet ? 'text-base' : 'text-lg'
-        }`}
-      >
-        <div className="max-w-5xl mx-auto">
+      <main className="flex-1 h-full min-h-0 overflow-y-auto px-6 py-8 text-base">
+        <div className="max-w-5x h-full min-h-0 flex flex-col">
           <Outlet />
+          {/* Fallback nếu không có children */}
+          {/* <div className="text-center text-muted-foreground mt-20">Chào mừng bạn đến với DevHub!</div> */}
         </div>
       </main>
     </div>

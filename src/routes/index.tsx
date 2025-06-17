@@ -1,6 +1,5 @@
 import { ProtectedRoute } from '@/components/auth';
 import { ROUTES } from '@/constants/routes';
-import { UploadProvider } from '@/contexts/UploadContext';
 import { AdminLayout, ChannelLayout, DashboardLayout, HomeFeedLayout, PublicLayout, WatchLayout } from '@/layouts';
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
@@ -17,9 +16,10 @@ const Channel = lazy(() => import('@/pages/channel'));
 const Dashboard = lazy(() => import('@/pages/dashboard'));
 const MyVideos = lazy(() => import('@/pages/dashboard/videos'));
 const EditVideo = lazy(() => import('@/pages/dashboard/videos/edit'));
-const UploadVideo = lazy(() => import('@/pages/dashboard/upload'));
 const Playlists = lazy(() => import('@/pages/dashboard/playlists'));
 const UserSettings = lazy(() => import('@/pages/dashboard/settings'));
+const UserProfile = lazy(() => import('@/pages/dashboard/profile'));
+const SavedVideo = lazy(() => import('@/pages/dashboard/saved'));
 
 const AdminUsers = lazy(() => import('@/pages/admin/users'));
 const AdminVideos = lazy(() => import('@/pages/admin/videos'));
@@ -39,18 +39,29 @@ export const appRoutes: RouteObject[] = [
           { path: '', element: <Home /> },
           { path: ROUTES.EXPLORE.slice(1), element: <Explore /> },
           { path: ROUTES.SEARCH.slice(1), element: <Search /> },
+          {
+            path: ROUTES.CHANNELS,
+            element: (
+              <ProtectedRoute role='user'>
+                <Channel />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: ROUTES.VIDEO.slice(1),
+            element: <WatchLayout />,
+            children: [{ path: '', element: <Watch /> }],
+          },
+          {
+            path: ROUTES.CHANNEL(),
+            element: <ChannelLayout />,
+            children: [{ path: '', element: <Channel /> }],
+          },
         ],
       },
-      {
-        path: ROUTES.VIDEO.slice(1),
-        element: <WatchLayout />,
-        children: [{ path: '', element: <Watch /> }],
-      },
-      {
-        path: ROUTES.CHANNEL(),
-        element: <ChannelLayout />,
-        children: [{ path: '', element: <Channel /> }],
-      },
+
+
+
     ],
   },
   // Authenticated routes
@@ -66,13 +77,10 @@ export const appRoutes: RouteObject[] = [
       { path: '', element: <Dashboard /> },
       { path: 'videos', element: <MyVideos /> },
       { path: 'videos/edit/:id', element: <EditVideo /> },
-      {
-        path: 'upload', element:
-          <UploadProvider>
-            <UploadVideo />
-          </UploadProvider>
-      }, { path: 'playlists', element: <Playlists /> },
+      { path: 'playlists', element: <Playlists /> },
       { path: 'settings', element: <UserSettings /> },
+      { path: 'profile', element: <UserProfile /> },
+      { path: 'saved', element: <SavedVideo /> },
     ],
   },
   // Admin routes

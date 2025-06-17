@@ -47,10 +47,7 @@ export interface IUpdateVideoMetadataRequest {
   description?: string;
   tags?: string[];
   category?: string;
-  thumbnailUrl?: string;
   privacy?: VidPrivacy;
-  publishAt?: string;
-  lifecycle?: VideoLifecycle;
 }
 
 export interface IGetVideoStatusResponse {

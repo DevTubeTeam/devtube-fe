@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { UploadVideoModal } from '@/components/upload';
 import { VideoEmptyState, VideoFilterBar, VideoGrid } from '@/components/video';
 import { ROUTES } from '@/constants/routes';
-import { UploadProvider } from '@/contexts/UploadContext';
 import { useVideo } from '@/hooks/useVideo';
 import { Upload } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -100,6 +99,8 @@ const MyVideosPage = () => {
       });
   }, [myVideos, searchQuery, activeFilters, sortOption]);
 
+  console.log('myVideos', myVideos);
+
   return (
     <div className="container max-w-7xl mx-auto py-6 px-4 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -139,9 +140,7 @@ const MyVideosPage = () => {
         />
       )}
 
-      <UploadProvider>
-        <UploadVideoModal isOpen={isUploadModalOpen} onClose={handleCloseUploadModal} />
-      </UploadProvider>
+      <UploadVideoModal isOpen={isUploadModalOpen} onClose={handleCloseUploadModal} />
     </div>
   );
 };

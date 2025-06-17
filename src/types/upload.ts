@@ -5,6 +5,15 @@ export interface UploadVideoResponse {
   message?: string;
 }
 
+export interface ICheckThumbnailRequest {
+  videoId: string;
+}
+
+export interface ICheckThumbnailResponse {
+  thumbnailUrl: string;
+  isExist: boolean;
+}
+
 export interface IThumbnailPresignedUrlRequest {
   videoId: string;
   fileName: string;

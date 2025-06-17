@@ -1,7 +1,7 @@
 import Hls from 'hls.js';
 import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface HLSVideoPlayerProps {
     source: string;
@@ -11,117 +11,105 @@ interface HLSVideoPlayerProps {
 
 function HLSVideoPlayer({ source, poster, className }: HLSVideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const hlsRef = useRef<Hls | null>(null);
+    const [hlsInstance, setHlsInstance] = useState<Hls | null>(null);
+    const [availableLevels, setAvailableLevels] = useState<{ label: string; levelIndex: number }[]>([]);
+    const [currentLevel, setCurrentLevel] = useState<number>(-1); // -1 = auto
+    const playerRef = useRef<Plyr | null>(null);
 
     useEffect(() => {
         const video = videoRef.current;
-        if (!video) return;
+        let hls: Hls | null = null;
 
-        const defaultOptions = {};
-
-        if (!Hls.isSupported()) {
-            video.src = source;
-            new Plyr(video, defaultOptions);
-        } else {
-            // Create a new hls.js instance
-            const hls = new Hls({
-                startLevel: -1,
-                maxMaxBufferLength: 30,
-                maxBufferLength: 10,
-                maxBufferSize: 60 * 1000 * 1000,
-                maxBufferHole: 0.5,
-                startFragPrefetch: true,
-            });
-
-            hlsRef.current = hls;
-            hls.loadSource(source);
-
-            // Handle the manifest parsing and quality selection
-            hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                const availableQualities = hls.levels.map((l) => l.height);
-                availableQualities.unshift(0);
-
-                const options = {
-                    ...defaultOptions,
-                    quality: {
-                        default: 0,
-                        options: availableQualities,
-                        forced: true,
-                        onChange: (e: number) => updateQuality(e),
-                    },
-                    i18n: {
-                        qualityLabel: { 0: 'Auto' },
-                    },
-                };
-
-                hls.on(Hls.Events.LEVEL_SWITCHED, function (event, data) {
-                    const span = document.querySelector(
-                        ".plyr__menu__container [data-plyr='quality'][value='0'] span"
-                    );
-                    if (span) {
-                        if (hls.autoLevelEnabled) {
-                            span.innerHTML = `AUTO (${hls.levels[data.level].height}p)`;
-                        } else {
-                            span.innerHTML = `AUTO`;
-                        }
-                    }
+        if (video) {
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    startLevel: -1,
+                    maxMaxBufferLength: 30,
+                    maxBufferLength: 10,
+                    maxBufferSize: 60 * 1000 * 1000,
+                    maxBufferHole: 0.5,
+                    startFragPrefetch: true,
                 });
 
-                new Plyr(video, options);
-            });
+                hls.loadSource(source);
+                hls.attachMedia(video);
 
-            hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    // Log available levels for debugging
+                    console.log('Available levels:', hls?.levels);
 
-            // Limit the number of segments preloaded in the buffer
-            hls.on(Hls.Events.FRAG_LOADING, function (event, data) {
-                const currentTime = video.currentTime;
-                const maxBufferedTime = 10;
+                    const levels = hls?.levels.map((level, i) => ({
+                        label: `${level.height}p`,
+                        levelIndex: i,
+                    })) || [];
 
-                if (data.frag && typeof data.frag.startPTS === 'number') {
-                    if (data.frag.startPTS > currentTime + maxBufferedTime) {
-                        hls.stopLoad();
-                    }
-                }
-            });
+                    setAvailableLevels([{ label: 'Auto', levelIndex: -1 }, ...levels]);
 
-            // Continue loading fragments when playback nears the end
-            hls.on(Hls.Events.FRAG_LOADED, function (event, data) {
-                const currentTime = video.currentTime;
-                const buffered = video.buffered;
-                let bufferLength = 0;
+                    // Create quality labels object dynamically
+                    const qualityLabels: Record<number, string> = {
+                        0: 'Auto'
+                    };
+                    levels.forEach(level => {
+                        qualityLabels[level.levelIndex] = level.label;
+                    });
 
-                if (buffered.length > 0) {
-                    for (let i = 0; i < buffered.length; i++) {
-                        if (buffered.start(i) <= currentTime && buffered.end(i) >= currentTime) {
-                            bufferLength = buffered.end(i) - currentTime;
-                            break;
+                    // Initialize Plyr with quality options
+                    const options = {
+                        controls: [
+                            'play-large',
+                            'play',
+                            'progress',
+                            'current-time',
+                            'mute',
+                            'volume',
+                            'captions',
+                            'settings',
+                            'pip',
+                            'airplay',
+                            'fullscreen'
+                        ],
+                        quality: {
+                            default: 0,
+                            options: levels.map(l => l.levelIndex),
+                            forced: true,
+                            onChange: (quality: number) => {
+                                if (hls) {
+                                    hls.currentLevel = quality;
+                                    setCurrentLevel(quality);
+                                }
+                            },
+                        },
+                        i18n: {
+                            qualityLabel: qualityLabels,
+                        },
+                    };
+
+                    const player = new Plyr(video, options);
+                    playerRef.current = player;
+
+                    // Update quality label when level changes
+                    hls?.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
+                        const span = document.querySelector(
+                            ".plyr__menu__container [data-plyr='quality'][value='0'] span"
+                        );
+                        if (span && hls?.autoLevelEnabled) {
+                            span.innerHTML = `AUTO (${hls.levels[data.level]?.height}p)`;
                         }
-                    }
-                }
-
-                if (bufferLength < 10) {
-                    hls.startLoad();
-                }
-            });
-        }
-
-        function updateQuality(newQuality: number) {
-            if (!hlsRef.current) return;
-
-            if (newQuality === 0) {
-                hlsRef.current.currentLevel = -1;
-            } else {
-                hlsRef.current.levels.forEach((level, levelIndex) => {
-                    if (level.height === newQuality) {
-                        hlsRef.current!.currentLevel = levelIndex;
-                    }
+                    });
                 });
+
+                setHlsInstance(hls);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = source;
+                const player = new Plyr(video);
+                playerRef.current = player;
             }
         }
 
         return () => {
-            if (hlsRef.current) {
-                hlsRef.current.destroy();
+            hls?.destroy();
+            if (playerRef.current) {
+                playerRef.current.destroy();
             }
         };
     }, [source]);

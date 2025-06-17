@@ -3,6 +3,7 @@ export const ROUTES = {
   EXPLORE: '/explore',
   SEARCH: '/search',
   VIDEO: '/video/:videoId',
+  CHANNELS: '/channels',
   CHANNEL: (id: string = ':id') => `/channel/${id}`,
 
   AUTH: '/auth',
@@ -14,6 +15,7 @@ export const ROUTES = {
   DASHBOARD_UPLOAD: '/dashboard/upload',
   DASHBOARD_PLAYLISTS: '/dashboard/playlists',
   DASHBOARD_SETTINGS: '/dashboard/settings',
+  DASHBOARD_PROFILE: '/dashboard/profile',
 
   ADMIN: '/admin',
   ADMIN_USERS: '/admin/users',

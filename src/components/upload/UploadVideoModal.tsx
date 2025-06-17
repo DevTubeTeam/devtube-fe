@@ -4,421 +4,536 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useUploadContext } from "@/contexts/UploadContext";
-import { IVideoFile, IVideoMetadata, VidPrivacy, VideoLifecycle } from "@/types/video";
-import { AlertCircle, CheckCircle, X } from "lucide-react";
+import { IVideoFile, VidPrivacy } from "@/types/video";
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "../ui/card";
-import { Progress } from "../ui/progress";
-import { Switch } from "../ui/switch";
+import { toast } from 'react-toastify';
+import * as Yup from 'yup';
+import { useUpload } from "../../hooks";
+import { ScrollArea } from "../ui/scroll-area";
 import { FileDropzone } from "./FileDropzone";
-import { ThumbnailSelector } from "./ThumbnailSelector";
 import { VisibilitySelector } from "./VisibilitySelector";
 
+// Constants
+const MAX_FILE_SIZE = 1024 * 1024 * 1024; // 1GB
+const MAX_THUMBNAIL_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_VIDEO_FORMATS = ['.mp4', '.mov', '.webm', '.avi'];
+const ACCEPTED_THUMBNAIL_FORMATS = ['image/jpeg', 'image/png', 'image/gif'];
+
+const CATEGORIES = [
+    'Education',
+    'Entertainment',
+    'Gaming',
+    'Music',
+    'Science & Technology',
+    'Sports',
+    'Travel',
+    'Other'
+] as const;
+
+// Types
 interface UploadVideoModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
+interface FormValues {
+    title: string;
+    description: string;
+    category: string;
+    tags: string[];
+    thumbnail: IVideoFile | null;
+    privacy: VidPrivacy;
+}
+
+// Validation Schema
+const VideoMetadataSchema = Yup.object().shape({
+    title: Yup.string()
+        .required('Tiêu đề là bắt buộc')
+        .max(100, 'Tiêu đề không được vượt quá 100 ký tự'),
+    description: Yup.string()
+        .max(5000, 'Mô tả không được vượt quá 5000 ký tự'),
+    category: Yup.string()
+        .required('Danh mục là bắt buộc')
+        .oneOf(CATEGORIES, 'Danh mục không hợp lệ'),
+    tags: Yup.array()
+        .of(Yup.string())
+        .max(10, 'Tối đa 10 tags'),
+    thumbnail: Yup.mixed<IVideoFile>()
+        .required('Thumbnail là bắt buộc')
+        .test('fileSize', 'Kích thước file không được vượt quá 5MB', (value) => {
+            if (!value) return false;
+            return value.size <= MAX_THUMBNAIL_SIZE;
+        })
+        .test('fileType', 'Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)', (value) => {
+            if (!value) return false;
+            return ACCEPTED_THUMBNAIL_FORMATS.includes(value.type);
+        }),
+    privacy: Yup.number()
+        .oneOf([VidPrivacy.PUBLIC, VidPrivacy.PRIVATE, VidPrivacy.UNLISTED])
+        .required('Quyền riêng tư là bắt buộc')
+});
+
+// Components
+const ThumbnailUpload = ({ value, onChange }: { value: IVideoFile | null; onChange: (file: IVideoFile | null) => void }) => (
+    <div className="space-y-4">
+        <Label>Thumbnail</Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
+                {value ? (
+                    <>
+                        <img
+                            src={URL.createObjectURL(value)}
+                            alt="Video thumbnail"
+                            className="h-full w-full object-cover"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (value) {
+                                    URL.revokeObjectURL(URL.createObjectURL(value));
+                                    onChange(null);
+                                }
+                            }}
+                            className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70 transition-colors"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    </>
+                ) : (
+                    <div className="flex h-full items-center justify-center">
+                        <div className="text-center">
+                            <ImageIcon className="mx-auto h-8 w-8 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">Chưa có thumbnail</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="flex flex-col justify-center">
+                <div
+                    className="border-2 border-dashed rounded-lg p-6 transition-colors hover:border-primary/50 hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+                    onClick={() => document.getElementById('thumbnail-upload')?.click()}
+                >
+                    <div className="text-center">
+                        <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
+                        <p className="mt-2 text-sm font-medium">Upload thumbnail</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            JPG, PNG hoặc GIF (tối đa 5MB)
+                        </p>
+                    </div>
+                </div>
+                <input
+                    id="thumbnail-upload"
+                    type="file"
+                    accept={ACCEPTED_THUMBNAIL_FORMATS.join(',')}
+                    className="hidden"
+                    onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                            if (file.size > MAX_THUMBNAIL_SIZE) {
+                                toast.error('Kích thước file không được vượt quá 5MB');
+                                return;
+                            }
+                            onChange(file as IVideoFile);
+                        }
+                    }}
+                />
+            </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+            Thumbnail sẽ giúp video của bạn nổi bật hơn. Kích thước đề xuất: 1280x720 pixels.
+        </p>
+    </div>
+);
+
+const TagsInput = ({ value, onChange }: { value: string[]; onChange: (tags: string[]) => void }) => {
+    const [input, setInput] = useState("");
+
+    const handleAddTag = (tag: string) => {
+        if (value.length >= 10) {
+            toast.error('Tối đa 10 tags');
+            return;
+        }
+        onChange([...value, tag]);
+        setInput('');
+    };
+
+    const handleRemoveTag = (tagToRemove: string) => {
+        onChange(value.filter(tag => tag !== tagToRemove));
+    };
+
+    return (
+        <div className="space-y-2">
+            <Label>Tags</Label>
+            <div className="flex gap-2">
+                <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && input.trim()) {
+                            e.preventDefault();
+                            handleAddTag(input.trim());
+                        }
+                    }}
+                    placeholder="Nhập tag và nhấn Enter"
+                    disabled={value.length >= 10}
+                />
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+                {value.map((tag) => (
+                    <div
+                        key={tag}
+                        className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm flex items-center"
+                    >
+                        {tag}
+                        <button
+                            type="button"
+                            onClick={() => handleRemoveTag(tag)}
+                            className="ml-2 text-secondary-foreground/70 hover:text-secondary-foreground"
+                        >
+                            ×
+                        </button>
+                    </div>
+                ))}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+                {value.length}/10 tags
+            </div>
+        </div>
+    );
+};
+
 export function UploadVideoModal({ isOpen, onClose }: UploadVideoModalProps) {
-    // State cho form metadata
-    const [localMetadata, setLocalMetadata] = useState<Partial<IVideoMetadata>>({
-        title: "",
-        description: "",
-        tags: [],
-        category: "",
-        thumbnailUrl: "",
-        privacy: VidPrivacy.PRIVATE,
-        lifecycle: VideoLifecycle.DRAFT,
+    const [file, setFile] = useState<IVideoFile | null>(null);
+    const [smoothUploadProgress, setSmoothUploadProgress] = useState(0);
+    const [videoId, setVideoId] = useState<string | null>(null);
+    const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'processing' | 'ready' | 'error'>('idle');
+    const [uploadToastId, setUploadToastId] = useState<string | number | null>(null);
+
+    const { uploadVideo, updateVideoMetadata } = useUpload({
+        onProgress: (progress) => {
+            setSmoothUploadProgress(progress);
+            if (progress === 100) {
+                setUploadStatus('processing');
+                if (uploadToastId) {
+                    toast.update(uploadToastId, {
+                        render: 'Video đang được xử lý, vui lòng đợi...',
+                        type: 'info',
+                        autoClose: false
+                    });
+                }
+            }
+        },
     });
 
-    // State cho tags
-    const [tagsInput, setTagsInput] = useState<string>("");
+    const { mutateAsync: uploadVideoMutation, isPending: isUploadingPending } = uploadVideo();
 
-    // State cho publish video
-    const [shouldPublish, setShouldPublish] = useState<boolean>(false);
-
-    // Danh sách category
-    const categories = [
-        'Education',
-        'Entertainment',
-        'Gaming',
-        'Music',
-        'Science & Technology',
-        'Sports',
-        'Travel',
-        'Other'
-    ];
-
-    // Chú ý: Có 2 loại trạng thái trong hệ thống
-    // 1. IVideoFile.status: 'idle' | 'uploading' | 'success' | 'error' - Trạng thái của file đang upload
-    // 2. VideoProcessingStatus: 'pending' | 'uploading' | 'processing' | 'ready' | 'failed' | 'cancelled' - Trạng thái xử lý video
-    const {
-        file,
-        // uploadProgress,
-        smoothUploadProgress,
-        error,
-        processingStatus,
-        isUploading,
-        canSaveMetadata,
-        uploadVideo,
-        setFile,
-        setMetadata,
-        setThumbnail,
-        reset,
-        cancelCurrentUpload,
-        publishVideo,
-        metadata,
-        updateVideoMetadata
-    } = useUploadContext();
-
-    // Reset state khi đóng modal
-    useEffect(() => {
-        if (!isOpen) {
-            reset();
-            setLocalMetadata({
-                title: "",
-                description: "",
-                tags: [],
-                category: "",
-                thumbnailUrl: "",
-                privacy: VidPrivacy.PRIVATE,
-                lifecycle: VideoLifecycle.DRAFT,
-            });
-            setTagsInput("");
-            setShouldPublish(false);
-        }
-    }, [isOpen, reset]);
-
-    // Cập nhật metadata khi có file mới
-    useEffect(() => {
-        if (file && file.name) {
-            // Suggest title từ tên file nhưng không tự động set để người dùng có thể sửa
-            const suggestedTitle = file.name.replace(/\.[^/.]+$/, ""); // Bỏ extension
-
-            // Chỉ set suggested title nếu title hiện tại đang trống
-            if (!localMetadata.title) {
-                setLocalMetadata(prev => ({
-                    ...prev,
-                    title: suggestedTitle
-                }));
-            }
-        }
-    }, [file, localMetadata.title]);
-
-    // Xử lý chọn file
-    const handleFileSelect = (selectedFile: File) => {
+    const handleVideoFileSelect = async (selectedFile: File) => {
         if (!selectedFile) return;
 
-        // Tạo IVideoFile từ File với status đúng chuẩn
         const videoFile = Object.assign(selectedFile, {
             progress: 0,
-            // IVideoFile.status chỉ chấp nhận: 'idle' | 'uploading' | 'success' | 'error'
             status: 'idle' as const
         }) as IVideoFile;
 
         setFile(videoFile);
-        uploadVideo.mutate({ file: videoFile });
-    };
+        setUploadStatus('uploading');
 
-    // Xử lý submit form
-    const handleSubmit = async () => {
-        if (canSaveMetadata && localMetadata && localMetadata.title && metadata?.id) {
-            const metadataToSave = {
-                ...localMetadata,
-                lifecycle: shouldPublish ? VideoLifecycle.PUBLISHED : VideoLifecycle.DRAFT
-            } as IVideoMetadata;
-
-            try {
-                // Cập nhật metadata lên server
-                await updateVideoMetadata.mutateAsync({
-                    videoId: metadata.id,
-                    metadata: {
-                        title: metadataToSave.title,
-                        description: metadataToSave.description,
-                        tags: metadataToSave.tags,
-                        category: metadataToSave.category,
-                        privacy: metadataToSave.privacy,
-                        lifecycle: metadataToSave.lifecycle
-                    }
-                });
-
-                // Cập nhật metadata trong context
-                setMetadata(metadataToSave);
-
-                // Nếu user chọn publish video, gọi API publish video
-                if (shouldPublish) {
-                    await publishVideo.mutateAsync({
-                        videoId: metadata.id,
-                        publishAt: new Date().toISOString()
-                    });
-                    console.log('Video đã được xuất bản thành công!');
-                }
-
-                onClose();
-            } catch (error) {
-                console.error('Lỗi khi cập nhật metadata:', error);
-            }
-        }
-    };
-
-    // Xử lý thêm tag
-    const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter' && tagsInput.trim()) {
-            e.preventDefault();
-            const newTag = tagsInput.trim();
-            if (!localMetadata.tags?.includes(newTag)) {
-                setLocalMetadata({
-                    ...localMetadata,
-                    tags: [...(localMetadata.tags || []), newTag]
-                });
-            }
-            setTagsInput("");
-        }
-    };
-
-    // Xử lý xóa tag
-    const handleRemoveTag = (tag: string) => {
-        setLocalMetadata({
-            ...localMetadata,
-            tags: localMetadata.tags?.filter(t => t !== tag)
+        // Tạo toast mới và lưu ID
+        const toastId = toast.info('Đang upload video...', {
+            autoClose: false,
+            closeOnClick: false,
+            closeButton: false,
+            draggable: false,
         });
+        setUploadToastId(toastId);
+
+        try {
+            const result = await uploadVideoMutation({ file: videoFile });
+            setVideoId(result.videoId);
+            setUploadStatus('ready');
+
+            // Cập nhật toast thành công
+            if (uploadToastId) {
+                toast.update(uploadToastId, {
+                    render: 'Upload video thành công! Bạn có thể tiếp tục nhập thông tin video.',
+                    type: 'success',
+                    autoClose: 3000
+                });
+            }
+        } catch (error) {
+            setUploadStatus('error');
+            // Cập nhật toast lỗi
+            if (uploadToastId) {
+                toast.update(uploadToastId, {
+                    render: 'Upload video thất bại: ' + (error instanceof Error ? error.message : 'Unknown error'),
+                    type: 'error',
+                    autoClose: 5000
+                });
+            }
+        } finally {
+            setUploadToastId(null);
+        }
     };
+
+    const handleSubmit = async (values: FormValues) => {
+        if (!videoId) {
+            toast.error('Video chưa sẵn sàng');
+            return;
+        }
+
+        // Kiểm tra các trường bắt buộc
+        if (!values.title.trim()) {
+            toast.error('Vui lòng nhập tiêu đề video');
+            return;
+        }
+
+        if (!values.category) {
+            toast.error('Vui lòng chọn danh mục');
+            return;
+        }
+
+        if (!values.thumbnail) {
+            toast.error('Vui lòng chọn thumbnail cho video');
+            return;
+        }
+
+        // Tạo toast loading
+        const toastId = toast.loading('Đang lưu thông tin video...', {
+            autoClose: false,
+            closeOnClick: false,
+            closeButton: false,
+            draggable: false,
+        });
+
+        try {
+            await updateVideoMetadata.mutateAsync({
+                videoId: videoId,
+                metadata: {
+                    title: values.title.trim(),
+                    description: values.description.trim(),
+                    category: values.category,
+                    tags: values.tags,
+                    privacy: values.privacy
+                },
+                thumbnail: values.thumbnail
+            });
+
+            // Cập nhật toast thành công
+            toast.update(toastId, {
+                render: 'Lưu thông tin video thành công!',
+                type: 'success',
+                autoClose: 3000,
+                isLoading: false
+            });
+
+            // Đóng modal sau khi lưu thành công
+            setTimeout(() => {
+                onClose();
+            }, 1000);
+        } catch (error) {
+            // Cập nhật toast lỗi
+            toast.update(toastId, {
+                render: 'Không thể lưu thông tin video. Vui lòng thử lại.',
+                type: 'error',
+                autoClose: 5000,
+                isLoading: false
+            });
+
+            // Log lỗi để debug
+            console.error('Error saving video metadata:', error);
+        }
+    };
+
+    // Reset state khi đóng modal
+    useEffect(() => {
+        if (!isOpen) {
+            setFile(null);
+            setSmoothUploadProgress(0);
+            setVideoId(null);
+            setUploadStatus('idle');
+        }
+    }, [isOpen]);
 
     // Xử lý đóng modal
     const handleClose = () => {
-        // Ngăn đóng modal khi đang upload
-        if (isUploading) {
-            return;
-        }
-
-        // Hỏi người dùng có muốn hủy upload không
-        if (file && !canSaveMetadata) {
+        if (isUploadingPending) {
             if (confirm('Bạn có chắc muốn hủy quá trình upload không?')) {
-                cancelCurrentUpload();
                 onClose();
             }
             return;
         }
-
         onClose();
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[650px]">
+            <DialogContent className="sm:max-w-[650px] h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Upload Video</DialogTitle>
                     <DialogDescription>
-                        {processingStatus === 'pending'
+                        {!file
                             ? 'Chọn file video để upload'
                             : 'Nhập thông tin chi tiết về video của bạn'}
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* Step 1: Chọn file */}
-                {processingStatus === 'pending' && !file && (
-                    <div className="grid place-items-center">
-                        <FileDropzone
-                            onFileSelect={handleFileSelect}
-                            maxSize={1024 * 1024 * 1024} // 1GB
-                            acceptedFormats={['.mp4', '.mov', '.webm', '.avi']}
-                        />
-                    </div>
-                )}
-
-                {/* Hiển thị file đã chọn và tiến trình upload */}
-                {file && (
-                    <div className="space-y-6">
-                        <Card>
-                            <CardContent className="p-4">
-                                <div className="flex justify-between items-center">
-                                    <div className="flex-1">
-                                        <h4 className="font-medium text-sm truncate">{file.name}</h4>
-                                        <p className="text-xs text-muted-foreground">
-                                            {(file.size / (1024 * 1024)).toFixed(2)} MB
-                                        </p>
-                                    </div>                                    <div className="flex items-center space-x-2">
-                                        {processingStatus === 'ready' && (
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                        )}
-                                        {(processingStatus === 'failed' || processingStatus === 'cancelled') && (
-                                            <AlertCircle className="h-5 w-5 text-red-500" />
-                                        )}
-                                        {!canSaveMetadata && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => cancelCurrentUpload()}
-                                                disabled={!file || processingStatus === 'ready'}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                                {(processingStatus === 'uploading' || processingStatus === 'processing') && (
-                                    <div className="mt-2">
-                                        <Progress value={smoothUploadProgress} className="h-2" />
-                                        <p className="text-xs text-right mt-1">
-                                            {processingStatus === 'uploading'
-                                                ? `Đang upload: ${Math.round(smoothUploadProgress)}%`
-                                                : 'Đang xử lý video...'}
-                                        </p>
-                                    </div>
-                                )}
-                                {error && (
-                                    <p className="text-sm text-red-500 mt-2">{error}</p>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Step 2: Form nhập metadata */}
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <Label>Thumbnail</Label>
-                                <ThumbnailSelector
-                                    videoFile={file}
-                                    currentThumbnail={localMetadata.thumbnailUrl || ''}
-                                    onChange={(url) => setLocalMetadata({ ...localMetadata, thumbnailUrl: url })}
-                                    onUpload={(file) => setThumbnail(file)}
-                                />
-                                <p className="text-sm text-muted-foreground">
-                                    Chọn hoặc tải lên hình ảnh thumbnail cho video của bạn
-                                </p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="title">Tiêu đề (bắt buộc)</Label>
-                                <Input
-                                    id="title"
-                                    value={localMetadata.title || ''}
-                                    onChange={(e) => setLocalMetadata({ ...localMetadata, title: e.target.value })}
-                                    placeholder="Nhập tiêu đề video"
-                                    maxLength={100}
-                                />
-                                <div className="flex justify-end">
-                                    <span className="text-xs text-muted-foreground">
-                                        {localMetadata.title?.length || 0}/100
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="description">Mô tả</Label>
-                                <Textarea
-                                    id="description"
-                                    value={localMetadata.description || ''}
-                                    onChange={(e) => setLocalMetadata({ ...localMetadata, description: e.target.value })}
-                                    placeholder="Nhập mô tả video"
-                                    rows={4}
-                                />
-                            </div>                            <div className="space-y-2">
-                                <Label htmlFor="visibility">Quyền riêng tư</Label>
-                                <VisibilitySelector
-                                    value={String(localMetadata.privacy)}
-                                    onChange={(value) =>
-                                        setLocalMetadata({
-                                            ...localMetadata,
-                                            privacy: VidPrivacy[value.toUpperCase() as keyof typeof VidPrivacy]
-                                        })
-                                    }
+                <ScrollArea className="h-[600px] w-full border rounded-md">
+                    <div className="p-6">
+                        {!file ? (
+                            <div className="flex flex-col items-center justify-center h-[400px] w-full">
+                                <FileDropzone
+                                    onFileSelect={handleVideoFileSelect}
+                                    maxSize={MAX_FILE_SIZE}
+                                    acceptedFormats={ACCEPTED_VIDEO_FORMATS}
                                 />
                             </div>
-
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="publish">Xuất bản video ngay</Label>
-                                    <Switch
-                                        id="publish"
-                                        checked={shouldPublish}
-                                        onCheckedChange={setShouldPublish}
-                                    />
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                    {shouldPublish
-                                        ? "Video của bạn sẽ được xuất bản ngay sau khi lưu"
-                                        : "Video sẽ được lưu dưới dạng bản nháp và chỉ bạn mới có thể xem"}
-                                </p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="tags">Tags</Label>
-                                <div>
-                                    <Input
-                                        id="tagsInput"
-                                        value={tagsInput}
-                                        onChange={(e) => setTagsInput(e.target.value)}
-                                        onKeyDown={handleAddTag}
-                                        placeholder="Thêm tags (nhấn Enter sau mỗi tag)"
-                                    />
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {localMetadata.tags && localMetadata.tags.map((tag: string) => (
+                        ) : (
+                            <div className="space-y-6">
+                                {uploadStatus === 'uploading' && (
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-sm">
+                                            <span>Đang upload video...</span>
+                                            <span>{smoothUploadProgress}%</span>
+                                        </div>
+                                        <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
                                             <div
-                                                key={tag}
-                                                className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm flex items-center"
-                                            >
-                                                {tag}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveTag(tag)}
-                                                    className="ml-2 text-secondary-foreground/70 hover:text-secondary-foreground"
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        ))}
+                                                className="bg-primary h-full transition-all duration-300"
+                                                style={{ width: `${smoothUploadProgress}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground text-center">
+                                            Vui lòng không đóng trình duyệt trong quá trình upload
+                                        </p>
                                     </div>
-                                </div>
-                            </div>
+                                )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="category">Danh mục</Label>
-                                <Select
-                                    value={localMetadata.category}
-                                    onValueChange={(value) => setLocalMetadata({ ...localMetadata, category: value })}
+                                {uploadStatus === 'processing' && (
+                                    <div className="flex flex-col items-center space-y-2 text-sm text-muted-foreground">
+                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                        <span>Đang xử lý video...</span>
+                                        <p className="text-xs text-center">
+                                            Quá trình này có thể mất vài phút tùy thuộc vào kích thước video
+                                        </p>
+                                    </div>
+                                )}
+
+                                <Formik<FormValues>
+                                    initialValues={{
+                                        title: "",
+                                        description: "",
+                                        category: "",
+                                        tags: [],
+                                        thumbnail: null,
+                                        privacy: VidPrivacy.PRIVATE
+                                    }}
+                                    onSubmit={handleSubmit}
+                                    validationSchema={VideoMetadataSchema}
+                                    enableReinitialize
                                 >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Chọn danh mục" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category} value={category.toLowerCase()}>
-                                                {category}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                    {({ values, setFieldValue, isSubmitting, errors, touched }) => (
+                                        <Form className="space-y-6">
+                                            <ThumbnailUpload
+                                                value={values.thumbnail}
+                                                onChange={(file) => setFieldValue('thumbnail', file)}
+                                            />
 
-                            {/* Publish option */}
-                            <div className="space-y-2">
-                                <Label>Xuất bản ngay</Label>
-                                <Switch
-                                    checked={shouldPublish}
-                                    onCheckedChange={setShouldPublish}
-                                />
+                                            <div className="space-y-2">
+                                                <Label htmlFor="title">Tiêu đề (bắt buộc)</Label>
+                                                <Field
+                                                    as={Input}
+                                                    id="title"
+                                                    name="title"
+                                                    placeholder="Nhập tiêu đề video"
+                                                />
+                                                <ErrorMessage name="title" component="div" className="text-sm text-destructive" />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="description">Mô tả</Label>
+                                                <Field
+                                                    as={Textarea}
+                                                    id="description"
+                                                    name="description"
+                                                    placeholder="Nhập mô tả video"
+                                                    className="min-h-[100px]"
+                                                />
+                                                <ErrorMessage name="description" component="div" className="text-sm text-destructive" />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="category">Danh mục (bắt buộc)</Label>
+                                                <Select
+                                                    value={values.category}
+                                                    onValueChange={(value) => setFieldValue('category', value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Chọn danh mục" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {CATEGORIES.map((category) => (
+                                                            <SelectItem key={category} value={category}>
+                                                                {category}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <ErrorMessage name="category" component="div" className="text-sm text-destructive" />
+                                            </div>
+
+                                            <TagsInput
+                                                value={values.tags}
+                                                onChange={(tags) => setFieldValue('tags', tags)}
+                                            />
+
+                                            <div className="space-y-4">
+                                                <Label>Quyền riêng tư</Label>
+                                                <div className="grid gap-4">
+                                                    <VisibilitySelector
+                                                        value={values.privacy}
+                                                        onChange={(value) => setFieldValue('privacy', value)}
+                                                    />
+                                                </div>
+                                                <ErrorMessage name="privacy" component="div" className="text-sm text-destructive" />
+                                            </div>
+
+                                            <DialogFooter className="mt-4">
+                                                <Button
+                                                    type="submit"
+                                                    disabled={
+                                                        !videoId ||
+                                                        isUploadingPending ||
+                                                        isSubmitting ||
+                                                        Object.keys(errors).length > 0 ||
+                                                        !values.title.trim() ||
+                                                        !values.category ||
+                                                        !values.thumbnail
+                                                    }
+                                                >
+                                                    {isUploadingPending ? (
+                                                        <>
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                            Đang upload...
+                                                        </>
+                                                    ) : isSubmitting ? (
+                                                        <>
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                            Đang lưu...
+                                                        </>
+                                                    ) : (
+                                                        'Lưu'
+                                                    )}
+                                                </Button>
+                                            </DialogFooter>
+                                        </Form>
+                                    )}
+                                </Formik>
                             </div>
-                        </div>
+                        )}
                     </div>
-                )}
-
-                {/* Phần nút điều khiển */}                <DialogFooter>
-                    <Button variant="outline" onClick={handleClose} disabled={isUploading}>
-                        {canSaveMetadata ? 'Hủy' : 'Đóng'}
-                    </Button>
-                    {file && (
-                        <Button
-                            type="submit"
-                            onClick={handleSubmit}
-                            disabled={!canSaveMetadata || !localMetadata.title}
-                        >
-                            {shouldPublish
-                                ? 'Lưu và xuất bản'
-                                : 'Lưu làm bản nháp'}
-                        </Button>
-                    )}
-                </DialogFooter>
+                </ScrollArea>
             </DialogContent>
         </Dialog>
     );

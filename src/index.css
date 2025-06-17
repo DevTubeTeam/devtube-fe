@@ -36,6 +36,9 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --scroll-thumb: #d1d5db; /* neutral-300 */
+  --scroll-thumb-hover: #a1a1aa; /* neutral-400 */
+  --scroll-track: #f3f4f6; /* neutral-100 */
 }
 
 .dark {
@@ -70,6 +73,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --scroll-thumb: #374151; /* neutral-700 */
+  --scroll-track: #18181b; /* neutral-900 */
 }
 
 @theme inline {
@@ -117,4 +122,22 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom scrollbar for light & dark theme */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: var(--scroll-track);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 8px;
+  border: 2px solid var(--scroll-track);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
 }

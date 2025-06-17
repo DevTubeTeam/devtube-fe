@@ -1,25 +1,28 @@
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { VidPrivacy } from '@/types/video';
 import { EyeOff, Globe, Lock } from 'lucide-react';
 import React from 'react';
 
 interface VisibilitySelectorProps {
-    value: string;
-    onChange: (value: string) => void;
+    value: number;
+    onChange: (value: number) => void;
 }
 
 export const VisibilitySelector: React.FC<VisibilitySelectorProps> = ({
     value,
     onChange,
 }) => {
+
+    console.log(value)
     return (
         <RadioGroup
-            value={value}
-            onValueChange={onChange}
+            value={String(value)}
+            onValueChange={(val) => onChange(Number(val))}
             className="space-y-3"
         >
             <div className="flex items-start space-x-3 p-3 rounded-lg border border-muted hover:bg-muted/50 cursor-pointer transition-colors">
-                <RadioGroupItem value="private" id="private" className="mt-1" />
+                <RadioGroupItem value={String(VidPrivacy.PRIVATE)} id="private" className="mt-1" />
                 <div className="space-y-1 flex-1">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="private" className="font-medium cursor-pointer">Private</Label>
@@ -32,7 +35,7 @@ export const VisibilitySelector: React.FC<VisibilitySelectorProps> = ({
             </div>
 
             <div className="flex items-start space-x-3 p-3 rounded-lg border border-muted hover:bg-muted/50 cursor-pointer transition-colors">
-                <RadioGroupItem value="unlisted" id="unlisted" className="mt-1" />
+                <RadioGroupItem value={String(VidPrivacy.UNLISTED)} id="unlisted" className="mt-1" />
                 <div className="space-y-1 flex-1">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="unlisted" className="font-medium cursor-pointer">Unlisted</Label>
@@ -45,7 +48,7 @@ export const VisibilitySelector: React.FC<VisibilitySelectorProps> = ({
             </div>
 
             <div className="flex items-start space-x-3 p-3 rounded-lg border border-muted hover:bg-muted/50 cursor-pointer transition-colors">
-                <RadioGroupItem value="public" id="public" className="mt-1" />
+                <RadioGroupItem value={String(VidPrivacy.PUBLIC)} id="public" className="mt-1" />
                 <div className="space-y-1 flex-1">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="public" className="font-medium cursor-pointer">Public</Label>

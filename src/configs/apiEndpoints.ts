@@ -32,6 +32,7 @@ const API_ENDPOINTS = {
     deleteById: (id: string) => `${API_BASES.VIDEO}/${id}`,
     getStatusById: (id: string) => `${API_BASES.VIDEO}/status/${id}`,
     publishVideo: (id: string) => `${API_BASES.VIDEO}/publish/${id}`,
+    checkThumbnail: (id: string) => `${API_BASES.VIDEO}/check-thumbnail/${id}`,
   }
 };
 

@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Upload } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -14,7 +12,7 @@ interface FileDropzoneProps {
 export const FileDropzone: React.FC<FileDropzoneProps> = ({
     onFileSelect,
     maxSize = 1024 * 1024 * 1024, // Default: 1GB
-    acceptedFormats = ['.mp4', '.mov', '.avi', '.wmv', '.flv', '.mkv', '.webm']
+    acceptedFormats = ['.mp4', '.mov', '.avi', '.webm']
 }) => {
     const [fileRejections, setFileRejections] = useState<{ file: File, reason: string }[]>([]);
 
@@ -44,13 +42,10 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
                     file: rejection.file,
                     reason
                 };
-            }); setFileRejections(rejections);
+            });
+            setFileRejections(rejections);
             rejections.forEach(rejection => {
-                if (typeof toast !== 'undefined') {
-                    toast.error(`${rejection.file.name}: ${rejection.reason}`);
-                } else {
-                    console.error(`${rejection.file.name}: ${rejection.reason}`);
-                }
+                toast.error(`${rejection.file.name}: ${rejection.reason}`);
             });
         }
     }, [onFileSelect, maxSize, acceptedFormats]);
@@ -73,60 +68,31 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    // Calculate dropzone state
-    const getDropzoneClassName = () => {
-        let className = "p-8 border-2 border-dashed rounded-lg transition-colors duration-200";
-
-        if (isDragActive && !isDragReject) {
-            className += " border-primary bg-primary/10";
-        } else if (isDragReject) {
-            className += " border-destructive bg-destructive/10";
-        } else {
-            className += " border-muted-foreground/30 hover:border-muted-foreground/50";
-        }
-
-        return className;
-    };
-
     return (
-        <Card className="w-full overflow-hidden">
-            <div
-                className={getDropzoneClassName() + " flex flex-col items-center justify-center space-y-4 min-h-[280px]"}
-                {...getRootProps()}
-            >
-                <input {...getInputProps()} />
-
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-primary" />
-                </div>
-
-                <div className="text-center">
-                    {isDragActive ? (
-                        <p className="text-lg font-medium">Thả file video vào đây...</p>
-                    ) : (
-                        <>
-                            <p className="text-lg font-medium">Kéo và thả file video hoặc</p>
-                            <Button type="button" variant="secondary" className="mt-4">
-                                Chọn File
-                            </Button>
-                        </>
-                    )}
-                    <p className="text-sm text-muted-foreground mt-2">
-                        Hỗ trợ định dạng: {acceptedFormats.join(', ')}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                        Kích thước tối đa: {formatFileSize(maxSize)}
-                    </p>
-                </div>
-
-                {fileRejections.length > 0 && (
-                    <div className="text-destructive text-sm mt-2">
-                        {fileRejections.map((rejection, index) => (
-                            <p key={index}>{rejection.file.name}: {rejection.reason}</p>
-                        ))}
-                    </div>
-                )}
+        <div
+            {...getRootProps()}
+            className={`
+                w-full max-w-lg mx-auto flex flex-col items-center justify-center
+                rounded-3xl border-2 border-dashed border-neutral-500
+                bg-gradient-to-b from-neutral-900/80 to-neutral-800/80
+                p-10 min-h-[260px] shadow-lg
+                transition-all duration-200 cursor-pointer
+                hover:border-primary hover:bg-neutral-800/90
+                focus:outline-none
+            `}
+        >
+            <input {...getInputProps()} />
+            <div className="w-20 h-20 rounded-full bg-neutral-700 flex items-center justify-center mb-4 shadow">
+                <Upload className="h-12 w-12 text-neutral-400" />
             </div>
-        </Card>
+            <div className="text-center">
+                <p className="text-xl font-bold text-white mb-2">
+                    {isDragActive ? 'Thả file vào đây...' : 'Kéo & thả hoặc click để chọn file video'}
+                </p>
+                <p className="text-sm text-neutral-400">
+                    (Chỉ hỗ trợ: {acceptedFormats.join(', ')})
+                </p>
+            </div>
+        </div>
     );
 };

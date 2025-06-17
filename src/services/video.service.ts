@@ -2,6 +2,8 @@ import API_ENDPOINTS from '@/configs/apiEndpoints';
 import {
   IAbortUploadRequest,
   IAbortUploadResponse,
+  ICheckThumbnailRequest,
+  ICheckThumbnailResponse,
   ICompleteUploadPart,
   ICompleteUploadRequest,
   ICompleteUploadResponse,
@@ -52,6 +54,24 @@ const videoService = {
         throw new Error(`Failed to fetch video metadata: ${error.message}`);
       } else {
         throw new Error('Failed to fetch video metadata: An unknown error occurred');
+      }
+    }
+  },
+
+  checkThumbnail: async (payload: ICheckThumbnailRequest): Promise<HttpResponse<ICheckThumbnailResponse>> => {
+    try {
+      const endpoint = API_ENDPOINTS.VIDEO.checkThumbnail(payload.videoId);
+      const response = await api.get(endpoint, { withCredentials: true });
+      if (response.data.statusCode !== 200) {
+        throw new Error(response.data.message || 'Failed to check thumbnail');
+      }
+      return response.data;
+    }
+    catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to check thumbnail: ${error.message}`);
+      } else {
+        throw new Error('Failed to check thumbnail: An unknown error occurred');
       }
     }
   },
