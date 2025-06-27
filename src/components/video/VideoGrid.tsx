@@ -6,9 +6,10 @@ import VideoCard from './VideoCard';
 interface VideoGridProps {
     isLoading: boolean;
     videos: IVideoMetadata[];
+    showEditDelete?: boolean;
 }
 
-const VideoGrid = ({ isLoading, videos }: VideoGridProps) => {
+const VideoGrid = ({ isLoading, videos, showEditDelete = false }: VideoGridProps) => {
     const skeletonCount = window.innerWidth >= 1280 ? 4 : window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1;
 
     if (isLoading) {
@@ -47,7 +48,7 @@ const VideoGrid = ({ isLoading, videos }: VideoGridProps) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                    <VideoCard video={video} />
+                    <VideoCard video={video} showEditDelete={showEditDelete} />
                 </motion.div>
             ))}
         </div>

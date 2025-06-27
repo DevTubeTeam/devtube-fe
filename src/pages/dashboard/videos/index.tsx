@@ -137,6 +137,7 @@ const MyVideosPage = () => {
         <VideoGrid
           isLoading={false}
           videos={filteredAndSortedVideos || []}
+          showEditDelete={true}
         />
       )}
 

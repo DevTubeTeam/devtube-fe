@@ -1,35 +1,19 @@
+import { useUser } from '@/hooks/useUser';
 import { cn } from '@/utils';
-import { BookOpen, ChevronDown, ChevronUp, Flame, HelpCircle, History, Home, ListVideo, PlaySquare, Settings, Star, ThumbsUp, Users } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronUp, History, Home, ListVideo, Loader2, PlaySquare, Settings, Star, ThumbsUp, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../constants/routes';
 
 const INITIAL_SHOW_COUNT = 10;
 
-const subscriptions = [
+// Mock data cho fallback khi chưa có dữ liệu thực
+const fallbackSubscriptions = [
   { key: 'faptv', label: 'FAPTV', avatar: '/avatars/faptv.png', live: true },
   { key: 'gino', label: 'GINÕ TỐNG', avatar: '/avatars/gino.png', live: false },
   { key: 'jtbc', label: 'JTBC Drama', avatar: '/avatars/jtbc.png', live: true },
   { key: 'rip113', label: 'Rip113', avatar: '/avatars/rip113.png', live: false },
   { key: 'wwe', label: 'WWE', avatar: '/avatars/wwe.png', live: false },
-  { key: '1million', label: '1MILLION Dance...', avatar: '/avatars/1million.png', live: false },
-  { key: '3gg', label: '3GG_P4C', avatar: '/avatars/3gg.png', live: false },
-  { key: 'vpop', label: 'V-POP Official', avatar: '/avatars/vpop.png', live: false },
-  { key: 'mixigaming', label: 'MixiGaming', avatar: '/avatars/mixi.png', live: true },
-  { key: 'sontung', label: 'Sơn Tùng M-TP', avatar: '/avatars/sontung.png', live: false },
-  { key: 'pewdiepie', label: 'PewDiePie', avatar: '/avatars/pewdiepie.png', live: false },
-  { key: 'mrbeast', label: 'MrBeast', avatar: '/avatars/mrbeast.png', live: true },
-  { key: 'jsmastery', label: 'JS Mastery', avatar: '/avatars/jsmastery.png', live: false },
-  { key: 'freecodecamp', label: 'freeCodeCamp', avatar: '/avatars/fcc.png', live: false },
-  { key: 'ted', label: 'TED', avatar: '/avatars/ted.png', live: false },
-  { key: 'theanh28', label: 'Thế Anh 28', avatar: '/avatars/theanh28.png', live: false },
-  { key: 'vtv24', label: 'VTV24', avatar: '/avatars/vtv24.png', live: false },
-  { key: 'kenh14', label: 'Kenh14', avatar: '/avatars/kenh14.png', live: false },
-  { key: 'zingnews', label: 'Zing News', avatar: '/avatars/zingnews.png', live: false },
-  { key: 'dantri', label: 'Dân Trí', avatar: '/avatars/dantri.png', live: false },
-  { key: 'cafebiz', label: 'CafeBiz', avatar: '/avatars/cafebiz.png', live: false },
-  { key: 'vietnamnet', label: 'Vietnamnet', avatar: '/avatars/vietnamnet.png', live: false },
-  { key: 'vtv7', label: 'VTV7', avatar: '/avatars/vtv7.png', live: false },
-  { key: 'vcl', label: 'VCL Channel', avatar: '/avatars/vcl.png', live: false },
 ];
 
 type MenuItemType = {
@@ -45,23 +29,25 @@ const DesktopDrawer: React.FC = () => {
   const currentPath = location.pathname;
   const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
 
+  // Lấy danh sách channel đã subscribe
+  const { useGetSubscribedChannels } = useUser();
+  const { data: subscribedChannelsData, isLoading: isSubscribedChannelsLoading, error: subscribedChannelsError } = useGetSubscribedChannels();
+
   const primaryNavItems: MenuItemType[] = [
     { key: 'home', icon: <Home size={18} />, label: 'Trang chủ', path: '/' },
-    { key: 'shorts', icon: <Flame size={18} />, label: 'Shorts', path: '/shorts' },
-    { key: 'subscriptions', icon: <PlaySquare size={18} />, label: 'Kênh đăng ký', path: '/subscriptions' },
+    { key: 'subscriptions', icon: <PlaySquare size={18} />, label: 'Kênh đăng ký', path: ROUTES.CHANNELS },
   ];
 
   const libraryItems: MenuItemType[] = [
-    { key: 'history', icon: <History size={18} />, label: 'Video đã xem', path: '/history' },
-    { key: 'bookmarks', icon: <BookOpen size={18} />, label: 'Danh sách phát', path: '/bookmarks' },
-    { key: 'your-videos', icon: <Users size={18} />, label: 'Video của bạn', path: '/your-videos' },
-    { key: 'watch-later', icon: <Star size={18} />, label: 'Xem sau', path: '/watch-later' },
-    { key: 'liked', icon: <ThumbsUp size={18} />, label: 'Video đã thích', path: '/liked' },
+    { key: 'history', icon: <History size={18} />, label: 'Video đã xem', path: ROUTES.HISTORY },
+    { key: 'playlists', icon: <BookOpen size={18} />, label: 'Danh sách phát', path: ROUTES.PLAYLISTS },
+    { key: 'your-videos', icon: <Users size={18} />, label: 'Video của bạn', path: ROUTES.DASHBOARD_VIDEOS },
+    { key: 'watch-later', icon: <Star size={18} />, label: 'Xem sau', path: ROUTES.WATCH_LATER },
+    { key: 'liked', icon: <ThumbsUp size={18} />, label: 'Video đã thích', path: ROUTES.LIKED },
   ];
 
   const footerItems: MenuItemType[] = [
-    { key: 'settings', icon: <Settings size={18} />, label: 'Cài đặt', path: '/settings' },
-    { key: 'help', icon: <HelpCircle size={18} />, label: 'Trợ giúp', path: '/help' },
+    { key: 'settings', icon: <Settings size={18} />, label: 'Cài đặt', path: ROUTES.DASHBOARD_SETTINGS },
   ];
 
   const renderMenuItem = (item: MenuItemType) => {
@@ -83,11 +69,51 @@ const DesktopDrawer: React.FC = () => {
     );
   };
 
-  const visibleSubscriptions = showAllSubscriptions
-    ? subscriptions
-    : subscriptions.slice(0, INITIAL_SHOW_COUNT);
+  // Xử lý dữ liệu channel đã subscribe
+  const subscribedChannels = subscribedChannelsData?.data?.channels || [];
+  const totalSubscribedCount = subscribedChannelsData?.data?.totalCount || 0;
 
-  const hasMoreSubscriptions = subscriptions.length > INITIAL_SHOW_COUNT;
+  // Sử dụng dữ liệu thực nếu có, nếu không dùng fallback
+  const displayChannels = subscribedChannels.length > 0 ? subscribedChannels : fallbackSubscriptions;
+
+  const visibleSubscriptions = showAllSubscriptions
+    ? displayChannels
+    : displayChannels.slice(0, INITIAL_SHOW_COUNT);
+
+  const hasMoreSubscriptions = displayChannels.length > INITIAL_SHOW_COUNT;
+
+  // Render subscription item
+  const renderSubscriptionItem = (channel: any, index: number) => {
+    // Nếu là dữ liệu thực từ API
+    if (subscribedChannels.length > 0) {
+      return (
+        <Link
+          key={channel.id}
+          to={`/channel/${channel.id}`}
+          className="flex items-center px-3 py-1 rounded-md hover:bg-accent/50 cursor-pointer transition-colors"
+        >
+          <img
+            src={channel.thumbnailUrl || '/avatars/default-channel.png'}
+            alt={channel.name}
+            className="w-6 h-6 rounded-full mr-3 object-cover"
+            onError={(e) => {
+              e.currentTarget.src = '/avatars/default-channel.png';
+            }}
+          />
+          <span className="flex-1 truncate text-sm">{channel.name}</span>
+        </Link>
+      );
+    }
+
+    // Nếu là fallback data
+    return (
+      <div key={channel.key} className="flex items-center px-3 py-1 rounded-md hover:bg-accent/50 cursor-pointer">
+        <img src={channel.avatar} alt={channel.label} className="w-6 h-6 rounded-full mr-3" />
+        <span className="flex-1 truncate text-sm">{channel.label}</span>
+        {channel.live && <span className="text-xs text-red-500 ml-2">●</span>}
+      </div>
+    );
+  };
 
   return (
     <div className="h-screen flex flex-col bg-background border-r border-border w-64">
@@ -108,16 +134,40 @@ const DesktopDrawer: React.FC = () => {
 
         {/* Section: Kênh đăng ký */}
         <div>
-          <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase">Kênh đăng ký</h3>
+          <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase">
+            Kênh đăng ký
+            {totalSubscribedCount > 0 && (
+              <span className="ml-2 text-xs text-muted-foreground">
+                ({totalSubscribedCount})
+              </span>
+            )}
+          </h3>
           <div className="space-y-1">
-            {visibleSubscriptions.map(sub => (
-              <div key={sub.key} className="flex items-center px-3 py-1 rounded-md hover:bg-accent/50 cursor-pointer">
-                <img src={sub.avatar} alt={sub.label} className="w-6 h-6 rounded-full mr-3" />
-                <span className="flex-1 truncate">{sub.label}</span>
-                {sub.live && <span className="text-xs text-red-500 ml-2">●</span>}
+            {isSubscribedChannelsLoading ? (
+              // Loading state
+              <div className="px-3 py-2">
+                <div className="flex items-center space-x-3">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Đang tải...</span>
+                </div>
               </div>
-            ))}
-            {showAllSubscriptions && (
+            ) : subscribedChannelsError ? (
+              // Error state
+              <div className="px-3 py-2">
+                <span className="text-sm text-red-500">Lỗi tải kênh đăng ký</span>
+              </div>
+            ) : subscribedChannels.length === 0 ? (
+              // Empty state
+              <div className="px-3 py-2">
+                <span className="text-sm text-muted-foreground">Chưa đăng ký kênh nào</span>
+              </div>
+            ) : (
+              // Render subscribed channels
+              visibleSubscriptions.map(renderSubscriptionItem)
+            )}
+
+            {/* Show all subscriptions button */}
+            {subscribedChannels.length > 0 && showAllSubscriptions && (
               <button
                 onClick={() => navigate('/channels')}
                 className="flex items-center w-full px-3 py-2 text-sm font-medium hover:bg-accent/50 hover:text-foreground rounded-md transition-colors text-muted-foreground"
@@ -126,6 +176,8 @@ const DesktopDrawer: React.FC = () => {
                 Tất cả các kênh đăng ký
               </button>
             )}
+
+            {/* Show more/less button */}
             {hasMoreSubscriptions && (
               <button
                 onClick={() => setShowAllSubscriptions(!showAllSubscriptions)}
@@ -139,7 +191,7 @@ const DesktopDrawer: React.FC = () => {
                 ) : (
                   <>
                     <ChevronDown className="w-4 h-4 mr-3" />
-                    Hiện thêm {subscriptions.length - INITIAL_SHOW_COUNT} kênh
+                    Hiện thêm {displayChannels.length - INITIAL_SHOW_COUNT} kênh
                   </>
                 )}
               </button>

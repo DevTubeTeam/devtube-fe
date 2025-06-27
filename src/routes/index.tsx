@@ -1,6 +1,6 @@
 import { ProtectedRoute } from '@/components/auth';
 import { ROUTES } from '@/constants/routes';
-import { AdminLayout, ChannelLayout, DashboardLayout, HomeFeedLayout, PublicLayout, WatchLayout } from '@/layouts';
+import { AdminLayout, DashboardLayout, HomeFeedLayout, PublicLayout, WatchLayout } from '@/layouts';
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 
@@ -16,10 +16,17 @@ const Channel = lazy(() => import('@/pages/channel'));
 const Dashboard = lazy(() => import('@/pages/dashboard'));
 const MyVideos = lazy(() => import('@/pages/dashboard/videos'));
 const EditVideo = lazy(() => import('@/pages/dashboard/videos/edit'));
-const Playlists = lazy(() => import('@/pages/dashboard/playlists'));
+const DashboardPlaylists = lazy(() => import('@/pages/dashboard/playlists'));
+const Playlists = lazy(() => import('@/pages/playlist'));
+const PlaylistEdit = lazy(() => import('@/pages/playlist/edit'));
 const UserSettings = lazy(() => import('@/pages/dashboard/settings'));
 const UserProfile = lazy(() => import('@/pages/dashboard/profile'));
 const SavedVideo = lazy(() => import('@/pages/dashboard/saved'));
+const DashboardPlaylistsEditPage = lazy(() => import('@/pages/dashboard/playlists/edit'));
+const ChannelListPage = lazy(() => import('@/pages/channels'));
+const SavedPage = lazy(() => import('@/pages/saved'));
+const WatchLaterPage = lazy(() => import('@/pages/watch-later'));
+const LikedPage = lazy(() => import('@/pages/liked'));
 
 const AdminUsers = lazy(() => import('@/pages/admin/users'));
 const AdminVideos = lazy(() => import('@/pages/admin/videos'));
@@ -40,10 +47,32 @@ export const appRoutes: RouteObject[] = [
           { path: ROUTES.EXPLORE.slice(1), element: <Explore /> },
           { path: ROUTES.SEARCH.slice(1), element: <Search /> },
           {
-            path: ROUTES.CHANNELS,
+            path: ROUTES.CHANNEL().slice(1),
+            element: (
+              <Channel />
+            ),
+          },
+          {
+            path: ROUTES.PLAYLISTS,
             element: (
               <ProtectedRoute role='user'>
-                <Channel />
+                <Playlists />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: ROUTES.PLAYLISTS,
+            element: (
+              <ProtectedRoute role='user'>
+                <Playlists />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: ROUTES.PLAYLIST(),
+            element: (
+              <ProtectedRoute role='user'>
+                <PlaylistEdit />
               </ProtectedRoute>
             ),
           },
@@ -53,9 +82,20 @@ export const appRoutes: RouteObject[] = [
             children: [{ path: '', element: <Watch /> }],
           },
           {
-            path: ROUTES.CHANNEL(),
-            element: <ChannelLayout />,
-            children: [{ path: '', element: <Channel /> }],
+            path: ROUTES.CHANNELS,
+            element: <ChannelListPage />,
+          },
+          {
+            path: ROUTES.SAVED,
+            element: <SavedPage />,
+          },
+          {
+            path: ROUTES.WATCH_LATER,
+            element: <WatchLaterPage />,
+          },
+          {
+            path: ROUTES.LIKED,
+            element: <LikedPage />
           },
         ],
       },
@@ -77,7 +117,8 @@ export const appRoutes: RouteObject[] = [
       { path: '', element: <Dashboard /> },
       { path: 'videos', element: <MyVideos /> },
       { path: 'videos/edit/:id', element: <EditVideo /> },
-      { path: 'playlists', element: <Playlists /> },
+      { path: 'playlists', element: <DashboardPlaylists /> },
+      { path: 'playlists/edit/:id', element: <DashboardPlaylistsEditPage /> },
       { path: 'settings', element: <UserSettings /> },
       { path: 'profile', element: <UserProfile /> },
       { path: 'saved', element: <SavedVideo /> },

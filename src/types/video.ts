@@ -79,3 +79,180 @@ export interface IPublishVideoResponse {
   publishAt: string;
   status: VidStatus;
 }
+
+export interface IGetVideoHomePageResponse {
+  videos: IVideoMetadata[];
+  totalCount: number;
+  page: number;
+  limit: number;
+}
+
+export interface IGetVideosResponse {
+  videos: IVideoMetadata[];
+  totalCount: number;
+  page: number;
+  limit: number;
+}
+
+export interface IComment {
+  id: string;
+  userId: string;
+  videoId: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface IUserInfo {
+  id: string;
+  name: string;
+  avatar: string;
+}
+
+export interface IGetCommentsResponse {
+  comments: IComment[];
+  users: IUserInfo[];
+}
+
+export interface IGetRelatedVideosResponse {
+  videos: IVideoMetadata[];
+}
+
+
+export interface ICreateCommentRequest {
+  content: string;
+}
+
+export interface ICreateCommentResponse {
+  comment: IComment;
+}
+
+export interface IPlaylist {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+  videos: IVideoMetadata[];
+}
+
+
+export interface IGetPlaylistsResponse {
+  playlists: IPlaylist[];
+  totalCount: number;
+  page: number;
+  limit: number;
+}
+
+export interface ICreatePlaylistRequest {
+  title: string;
+  description: string;
+  isPublic: boolean;
+}
+
+export interface IGetPlaylistByIdResponse {
+  playlist: IPlaylist | undefined;
+}
+
+export interface ICreatePlaylistResponse {
+  playlistId: string;
+}
+
+export interface IUpdatePlaylistRequest {
+  title: string;
+  description: string;
+  isPublic: boolean;
+}
+export interface IUpdatePlaylistResponse {
+  playlistId: string;
+}
+
+export interface IDeletePlaylistResponse {
+  id: string;
+  deleted: boolean;
+}
+
+export interface IEditVideoPlaylistRequest {
+  videos: IVideoMetadata[];
+}
+
+export interface IEditVideoPlaylistResponse {
+  playlistId: string;
+}
+
+export interface IGetChannelVideosResponse {
+  videos: IVideoMetadata[];
+  totalCount: number;
+}
+
+export interface IGetChannelPlaylistsResponse {
+  playlists: IPlaylist[];
+  totalCount: number;
+}
+
+// Like video
+
+export interface ILikeVideoResponse {
+  id: string;
+  liked: boolean;
+}
+
+export interface IUnlikeVideoResponse {
+  id: string;
+  unliked: boolean;
+}
+
+export interface IGetVideoLikesCountResponse {
+  likesCount: number;
+}
+
+export interface IGetLikedVideosResponse {
+  videos: IVideoMetadata[];
+}
+
+export interface IIsLikedVideoResponse {
+  isLiked: boolean;
+}
+
+// Saved video
+
+export interface ISavedVideoResponse {
+  id: string;
+  saved: boolean;
+}
+
+export interface IUnsavedVideoResponse {
+  id: string;
+  unsaved: boolean;
+}
+
+export interface IGetSavedVideosResponse {
+  videos: IVideoMetadata[];
+}
+
+export interface IIsSavedVideoResponse {
+  isSaved: boolean;
+}
+
+// Watch later
+
+export interface IAddVideoToWatchLaterResponse {
+  id: string;
+  added: boolean;
+}
+
+export interface IRemoveVideoFromWatchLaterResponse {
+  id: string;
+  removed: boolean;
+}
+
+export interface IGetWatchLaterVideosResponse {
+  videos: IVideoMetadata[];
+}
+
+export interface IIsVideoInWatchLaterResponse {
+  isInWatchLater: boolean;
+}
+

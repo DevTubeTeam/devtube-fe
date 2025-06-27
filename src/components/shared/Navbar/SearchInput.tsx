@@ -1,20 +1,21 @@
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchInputProps {
   className?: string;
   placeholder?: string;
-  onSearch?: (query: string) => void;
 }
 
-const SearchInput = ({ className, placeholder = 'Search videos...', onSearch }: SearchInputProps) => {
+const SearchInput = ({ className, placeholder = 'Search videos...' }: SearchInputProps) => {
   const [query, setQuery] = React.useState('');
+  const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSearch) {
-      onSearch(query);
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 

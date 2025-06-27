@@ -1,7 +1,10 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Outlet } from 'react-router-dom';
+import { RelatedVideos } from '@/components/video/RelatedVideos';
+import { Outlet, useParams } from 'react-router-dom';
 
 export const WatchLayout = () => {
+  const { videoId } = useParams<{ videoId: string }>();
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container px-4 py-6">
@@ -14,11 +17,7 @@ export const WatchLayout = () => {
           {/* Sidebar - takes up 4 columns on large screens */}
           <aside className="lg:col-span-4">
             <ScrollArea className="h-[calc(100vh-6rem)]">
-              {/* Sidebar content will be added here */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold">Related Videos</h2>
-                {/* Related videos will be added here */}
-              </div>
+              {videoId && <RelatedVideos videoId={videoId} />}
             </ScrollArea>
           </aside>
         </div>

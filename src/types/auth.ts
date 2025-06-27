@@ -53,3 +53,34 @@ export interface IVerifyTokenResponse {
     role: IRole;
   };
 }
+
+export interface IChannel {
+  id: string;
+  name: string;
+  description: string;
+  thumbnailUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IGetChannelByUserIdResponse {
+  channel: IChannel;
+}
+
+export interface ISearchChannelsResponse {
+  channels: IChannel[];
+  totalCount: number;
+  page: number;
+  limit: number;
+}
+
+export interface IGetChannelSubscribersCountResponse {
+  totalCount: number;
+}
+
+export interface IGetSubscribedChannelsResponse {
+  channels: IChannel[];
+  totalCount: number;
+  page: number;
+  limit: number;
+}

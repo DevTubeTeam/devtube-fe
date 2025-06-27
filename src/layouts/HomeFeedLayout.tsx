@@ -11,8 +11,6 @@ export function HomeFeedLayout() {
       <main className="flex-1 h-full min-h-0 overflow-y-auto px-6 py-8 text-base">
         <div className="max-w-5x h-full min-h-0 flex flex-col">
           <Outlet />
-          {/* Fallback nếu không có children */}
-          {/* <div className="text-center text-muted-foreground mt-20">Chào mừng bạn đến với DevHub!</div> */}
         </div>
       </main>
     </div>

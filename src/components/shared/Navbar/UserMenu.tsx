@@ -57,9 +57,9 @@ const UserMenu: React.FC = () => {
             <LayoutDashboard className="mr-2 h-4 w-4" />
             Studio của tôi
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate(`${ROUTES.DASHBOARD}/videos`)}>
+          <DropdownMenuItem onClick={() => navigate(`${ROUTES.CHANNEL(user.id)}`)}>
             <VideoIcon className="mr-2 h-4 w-4" />
-            Video của tôi
+            Kênh của tôi
           </DropdownMenuItem>
           <DropdownMenuSeparator />
 
