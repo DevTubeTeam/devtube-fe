@@ -1,13 +1,18 @@
 import API_ENDPOINTS from '@/configs/apiEndpoints';
 import {
+  IAuthenticatedUser,
+  IAvatarPresignedUrlRequest,
+  IAvatarPresignedUrlResponse,
   IChannel,
   IGetChannelSubscribersCountResponse,
   IGetSubscribedChannelsResponse,
+  IGetUserProfileResponse,
   IGoogleCallbackRequest,
   IGoogleCallbackResponse,
-  IGoogleCallBackUser,
   IGoogleSilentCallbackRequest,
   ISearchChannelsResponse,
+  IUpdateUserProfileRequest,
+  IUpdateUserProfileResponse,
   IVerifyTokenResponse
 } from '@/types/auth';
 import api from './axios';
@@ -67,7 +72,7 @@ const authService = {
     }
   },
 
-  getAuthenticatedUser: async (): Promise<HttpResponse<IGoogleCallBackUser>> => {
+  getAuthenticatedUser: async (): Promise<HttpResponse<IAuthenticatedUser>> => {
     try {
       const response = await api.get(API_ENDPOINTS.AUTH.ME, { withCredentials: true });
       return response.data;
@@ -137,6 +142,33 @@ const authService = {
       return response.data;
     } catch (error) {
       throw new Error('Failed to get subscribed channels');
+    }
+  },
+
+  updateUserProfile: async (payload: IUpdateUserProfileRequest): Promise<HttpResponse<IUpdateUserProfileResponse>> => {
+    try {
+      const response = await api.patch(API_ENDPOINTS.AUTH.UPDATE_USER_PROFILE, payload, { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to update user profile');
+    }
+  },
+
+  getUserProfile: async (): Promise<HttpResponse<IGetUserProfileResponse>> => {
+    try {
+      const response = await api.get(API_ENDPOINTS.AUTH.GET_USER_PROFILE, { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to get user profile');
+    }
+  },
+
+  createAvatarPresignedUrl: async (payload: IAvatarPresignedUrlRequest): Promise<HttpResponse<IAvatarPresignedUrlResponse>> => {
+    try {
+      const response = await api.post(API_ENDPOINTS.AUTH.CREATE_AVATAR_PRESIGNED_URL, payload, { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to create avatar presigned url');
     }
   },
 };

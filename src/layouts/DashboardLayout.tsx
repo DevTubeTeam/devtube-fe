@@ -1,15 +1,14 @@
+import { ModeToggle } from '@/components/common/ModeToggle';
 import UserMenu from '@/components/shared/Navbar/UserMenu';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Bell,
-  Bookmark,
   ChevronLeft,
   Film,
   Layers,
   ListVideo,
   Menu,
-  Settings,
   User,
   Video
 } from 'lucide-react';
@@ -43,41 +42,20 @@ export const DashboardLayout = () => {
       description: 'Quản lý playlist',
     },
     {
-      name: 'Đã lưu',
-      path: '/dashboard/saved',
-      icon: <Bookmark className="h-5 w-5" />,
-      description: 'Quản lý video đã lưu',
-    },
-    {
       name: 'Trang cá nhân',
       path: '/dashboard/profile',
       icon: <User className="h-5 w-5" />,
       description: 'Trang cá nhân',
     },
-    {
-      name: 'Cài đặt',
-      path: '/dashboard/settings',
-      icon: <Settings className="h-5 w-5" />,
-      description: 'Cài đặt tài khoản',
-    },
   ];
 
-  // Footer navigation items (phần dưới)
-  const footerNavigationItems = [
-    {
-      name: 'Cài đặt',
-      path: '/dashboard/settings',
-      icon: <Settings className="h-5 w-5" />,
-      description: 'Cài đặt tài khoản',
-    },
-  ];
 
   // Tiêu đề động theo route
   const getTitle = () => {
     if (location.pathname === '/dashboard') return 'Tổng quan';
     if (location.pathname.startsWith('/dashboard/videos')) return 'Video của tôi';
-    if (location.pathname.startsWith('/dashboard/playlists')) return 'Playlist';
-    if (location.pathname.startsWith('/dashboard/settings')) return 'Cài đặt';
+    if (location.pathname.startsWith('/dashboard/playlists')) return 'Danh sách phát';
+    if (location.pathname.startsWith('/dashboard/profile')) return 'Trang cá nhân';
     return 'Bảng điều khiển';
   };
 
@@ -145,21 +123,6 @@ export const DashboardLayout = () => {
             </button>
           )}
         </nav>
-
-        {/* Footer Navigation */}
-        <div className={`mt-auto border-t p-2`}>
-          {footerNavigationItems.map(item => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center rounded-md px-3 py-2.5 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 ${isActive(item.path) ? 'bg-neutral-200 dark:bg-neutral-800 font-semibold' : ''}`}
-              title={isCollapsed ? item.description : undefined}
-            >
-              <span className="mr-3">{item.icon}</span>
-              {!isCollapsed && <span className="font-medium">{item.name}</span>}
-            </Link>
-          ))}
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -178,6 +141,9 @@ export const DashboardLayout = () => {
             >
               Trang chủ
             </Link>
+
+            {/* Theme toggle */}
+            <ModeToggle />
 
             {/* Notification Dropdown */}
             <DropdownMenu>

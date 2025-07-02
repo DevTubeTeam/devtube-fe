@@ -9,9 +9,17 @@ import {
     IUpdatePlaylistRequest
 } from "../types/video";
 
+/**
+ * Custom hook chứa tất cả các hooks liên quan đến video
+ * Bao gồm: quản lý video, playlist, comments, likes, saved videos, watch later
+ */
 export function useVideo() {
     const queryClient = useQueryClient();
 
+    /**
+     * Hook để lấy danh sách video của user hiện tại
+     * Tự động refetch mỗi 5 giây để cập nhật trạng thái video
+     */
     function useMyVideos() {
         return useQuery({
             queryKey: ['myVideos'],
@@ -23,6 +31,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy thông tin chi tiết của một video theo ID
+     * @param videoId - ID của video cần lấy thông tin
+     */
     function useVideoById(videoId: string) {
         return useQuery({
             queryKey: ['video', videoId],
@@ -33,6 +45,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để kiểm tra thumbnail của video
+     * @param videoId - ID của video cần kiểm tra thumbnail
+     */
     function useCheckThumbnail(videoId: string) {
         return useQuery({
             queryKey: ['thumbnail', videoId],
@@ -43,6 +59,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy trạng thái xử lý của video
+     * @param videoId - ID của video cần kiểm tra trạng thái
+     */
     function useGetVideoStatus(videoId: string) {
         return useQuery({
             queryKey: ['videoStatus', videoId],
@@ -53,6 +73,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để xóa video
+     * @param videoId - ID của video cần xóa
+     */
     function useDeleteVideo(videoId: string) {
         return useMutation({
             mutationFn: async () => {
@@ -67,6 +91,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để publish video
+     * @param videoId - ID của video cần publish
+     */
     function usePublishVideo(videoId: string) {
         return useMutation({
             mutationFn: async () => {
@@ -80,6 +108,17 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy danh sách video với các filter khác nhau
+     * @param params - Object chứa các tham số filter
+     * @param params.type - Loại video: 'recommended' | 'popular' | 'search'
+     * @param params.page - Số trang
+     * @param params.limit - Số lượng video mỗi trang
+     * @param params.category - Danh mục video
+     * @param params.timeRange - Khoảng thời gian: 'day' | 'week' | 'month' | 'year' | 'all'
+     * @param params.query - Từ khóa tìm kiếm
+     * @param params.sortBy - Cách sắp xếp: 'relevance' | 'date' | 'views'
+     */
     function useGetVideos(params: {
         type: 'recommended' | 'popular' | 'search';
         page?: number;
@@ -100,6 +139,11 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy video cho trang chủ
+     * @param page - Số trang (mặc định: 1)
+     * @param limit - Số lượng video mỗi trang (mặc định: 10)
+     */
     function useGetHomepageVideos(page: number = 1, limit: number = 10) {
         return useQuery({
             queryKey: ['homepageVideos', page, limit],
@@ -110,7 +154,10 @@ export function useVideo() {
         });
     }
 
-
+    /**
+     * Hook để lấy danh sách comments của video
+     * @param videoId - ID của video cần lấy comments
+     */
     function useGetComments(videoId: string) {
         return useQuery({
             queryKey: ['comments', videoId],
@@ -121,6 +168,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy danh sách video liên quan
+     * @param videoId - ID của video hiện tại
+     */
     function useGetRelatedVideos(videoId: string) {
         return useQuery({
             queryKey: ['relatedVideos', videoId],
@@ -131,8 +182,11 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để tạo comment mới cho video
+     * @param videoId - ID của video cần comment
+     */
     function useCreateComment(videoId: string) {
-
         return useMutation({
             mutationFn: async (data: ICreateCommentRequest) => {
                 const response = await videoService.createComment(videoId, data);
@@ -145,6 +199,11 @@ export function useVideo() {
     }
 
     // Playlist hooks
+    /**
+     * Hook để lấy danh sách playlist
+     * @param page - Số trang (mặc định: 1)
+     * @param limit - Số lượng playlist mỗi trang (mặc định: 10)
+     */
     function useGetPlaylists(page: number = 1, limit: number = 10) {
         return useQuery({
             queryKey: ['playlists', page, limit],
@@ -155,6 +214,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy thông tin chi tiết của playlist
+     * @param playlistId - ID của playlist cần lấy thông tin
+     */
     function useGetPlaylistById(playlistId: string) {
         return useQuery({
             queryKey: ['playlist', playlistId],
@@ -165,6 +228,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để tạo playlist mới
+     */
     function useCreatePlaylist() {
         return useMutation({
             mutationFn: async (data: ICreatePlaylistRequest) => {
@@ -178,6 +244,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để cập nhật thông tin playlist
+     */
     function useUpdatePlaylist() {
         return useMutation({
             mutationFn: async ({ playlistId, data }: { playlistId: string; data: IUpdatePlaylistRequest }) => {
@@ -190,6 +259,10 @@ export function useVideo() {
         });
     }
 
+
+    /**
+     * Hook để xóa playlist
+     */
     function useDeletePlaylist() {
         return useMutation({
             mutationFn: async (playlistId: string) => {
@@ -202,6 +275,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để chỉnh sửa video trong playlist (thêm/xóa video)
+     */
     function useEditVideoPlaylist() {
         return useMutation({
             mutationFn: async ({ playlistId, data }: { playlistId: string; data: IEditVideoPlaylistRequest }) => {
@@ -214,6 +290,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy danh sách video của một channel
+     * @param channelId - ID của channel cần lấy danh sách video
+     */
     function useGetChannelVideos(channelId: string) {
         return useQuery({
             queryKey: ['channelVideos', channelId],
@@ -224,6 +304,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy danh sách playlist của một channel
+     * @param channelId - ID của channel cần lấy danh sách playlist
+     */
     function useGetChannelPlaylists(channelId: string) {
         return useQuery({
             queryKey: ['channelPlaylists', channelId],
@@ -235,6 +319,9 @@ export function useVideo() {
     }
 
     // Like video hooks
+    /**
+     * Hook để like một video
+     */
     function useLikeVideo() {
         return useMutation({
             mutationFn: async (videoId: string) => {
@@ -249,6 +336,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để unlike một video
+     */
     function useUnlikeVideo() {
         return useMutation({
             mutationFn: async (videoId: string) => {
@@ -263,6 +353,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy số lượng like của một video
+     * @param videoId - ID của video cần lấy số lượng like
+     */
     function useGetVideoLikesCount(videoId: string) {
         return useQuery({
             queryKey: ['videoLikesCount', videoId],
@@ -273,6 +367,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy danh sách video đã like của user hiện tại
+     */
     function useGetLikedVideos() {
         return useQuery({
             queryKey: ['likedVideos'],
@@ -283,6 +380,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để kiểm tra xem user hiện tại đã like video chưa
+     * @param videoId - ID của video cần kiểm tra
+     */
     function useIsLikedVideo(videoId: string) {
         return useQuery({
             queryKey: ['isLikedVideo', videoId],
@@ -294,6 +395,9 @@ export function useVideo() {
     }
 
     // Saved video hooks
+    /**
+     * Hook để lưu video vào danh sách đã lưu
+     */
     function useSaveVideo() {
         return useMutation({
             mutationFn: async (videoId: string) => {
@@ -307,6 +411,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để bỏ lưu video khỏi danh sách đã lưu
+     */
     function useUnsaveVideo() {
         return useMutation({
             mutationFn: async (videoId: string) => {
@@ -320,6 +427,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy danh sách video đã lưu của user hiện tại
+     */
     function useGetSavedVideos() {
         return useQuery({
             queryKey: ['savedVideos'],
@@ -330,6 +440,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để kiểm tra xem video đã được lưu chưa
+     * @param videoId - ID của video cần kiểm tra
+     */
     function useIsSavedVideo(videoId: string) {
         return useQuery({
             queryKey: ['isSavedVideo', videoId],
@@ -341,6 +455,9 @@ export function useVideo() {
     }
 
     // Watch later hooks
+    /**
+     * Hook để thêm video vào danh sách xem sau
+     */
     function useAddToWatchLater() {
         return useMutation({
             mutationFn: async (videoId: string) => {
@@ -354,6 +471,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để xóa video khỏi danh sách xem sau
+     */
     function useRemoveFromWatchLater() {
         return useMutation({
             mutationFn: async (videoId: string) => {
@@ -367,6 +487,9 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để lấy danh sách video trong danh sách xem sau
+     */
     function useGetWatchLaterVideos() {
         return useQuery({
             queryKey: ['watchLaterVideos'],
@@ -377,6 +500,10 @@ export function useVideo() {
         });
     }
 
+    /**
+     * Hook để kiểm tra xem video đã được thêm vào danh sách xem sau chưa
+     * @param videoId - ID của video cần kiểm tra
+     */
     function useIsInWatchLater(videoId: string) {
         return useQuery({
             queryKey: ['isInWatchLater', videoId],

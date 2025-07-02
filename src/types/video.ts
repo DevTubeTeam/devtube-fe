@@ -24,6 +24,8 @@ export enum VideoLifecycle {
 export interface IVideoMetadata {
   id: string;
   userId: string;
+  displayName: string;
+  avatarUrl: string;
   title: string;
   description: string;
   tags: string[];

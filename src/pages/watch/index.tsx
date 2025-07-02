@@ -2,6 +2,7 @@ import { GoogleLoginButton } from '@/components/auth/GoogleLoginButton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -13,7 +14,7 @@ import { useUser } from '@/hooks/useUser';
 import { useVideo } from '@/hooks/useVideo';
 import { IComment } from '@/types/video';
 import { formatViews } from '@/utils/format-video-info.util';
-import { ChevronDown, ChevronUp, Clock, ListPlus, MoreHorizontal, Save, ThumbsUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Copy, ListPlus, MoreHorizontal, Save, Share2, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -71,7 +72,9 @@ const WatchPage = () => {
     useIsSavedVideo,
     useAddToWatchLater,
     useRemoveFromWatchLater,
-    useIsInWatchLater
+    useIsInWatchLater,
+    useGetPlaylists,
+    useEditVideoPlaylist,
   } = useVideo();
   const {
     useSubscribeToChannel,
@@ -85,6 +88,8 @@ const WatchPage = () => {
   const createCommentMutation = useCreateComment(videoId || '');
   const { data: video, isLoading: isLoadingVideo } = useVideoById(videoId || '');
   const { data: comments, isLoading: isLoadingComments } = useGetComments(videoId || '');
+
+  console.log(video)
 
   // Like video hooks
   const likeVideoMutation = useLikeVideo();
@@ -108,8 +113,14 @@ const WatchPage = () => {
   const removeFromWatchLaterMutation = useRemoveFromWatchLater();
   const { data: isInWatchLaterData } = useIsInWatchLater(videoId || '');
 
+  // Playlist hooks
+  const { data: playlistsData, isLoading: isLoadingPlaylists } = useGetPlaylists();
+  const editVideoPlaylistMutation = useEditVideoPlaylist();
+
   const [commentContent, setCommentContent] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
 
   const isLiked = isLikedData?.isLiked || false;
   const likesCount = likesCountData?.likesCount || 0;
@@ -150,7 +161,7 @@ const WatchPage = () => {
         await likeVideoMutation.mutateAsync(videoId);
         toast.success('Đã thích video');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Có lỗi xảy ra khi thao tác với video');
     }
   };
@@ -177,7 +188,7 @@ const WatchPage = () => {
         refetchIsSubscribed();
         refetchSubscribersCount();
       }, 100);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Có lỗi xảy ra khi thao tác với kênh');
     }
   };
@@ -198,7 +209,7 @@ const WatchPage = () => {
         await saveVideoMutation.mutateAsync(videoId);
         toast.success('Đã lưu video');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Có lỗi xảy ra khi thao tác với video');
     }
   };
@@ -219,8 +230,71 @@ const WatchPage = () => {
         await addToWatchLaterMutation.mutateAsync(videoId);
         toast.success('Đã thêm vào xem sau');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Có lỗi xảy ra khi thao tác với video');
+    }
+  };
+
+  const handleShareVideo = () => {
+    setIsShareModalOpen(true);
+  };
+
+  const handleCopyLink = async () => {
+    const videoUrl = `${window.location.origin}/watch/${videoId}`;
+    try {
+      await navigator.clipboard.writeText(videoUrl);
+      toast.success('Đã sao chép link video!');
+      setIsShareModalOpen(false);
+    } catch (err) {
+      toast.error('Không thể sao chép link');
+    }
+  };
+
+  const handleShareToSocial = (platform: string) => {
+    const videoUrl = `${window.location.origin}/watch/${videoId}`;
+    const text = video?.title || 'Check out this video!';
+
+    let shareUrl = '';
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(videoUrl)}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(videoUrl)}&text=${encodeURIComponent(text)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(videoUrl)}`;
+        break;
+      default:
+        return;
+    }
+
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+    setIsShareModalOpen(false);
+  };
+
+  const handleOpenPlaylistDialog = () => {
+    if (!isAuthenticated) {
+      toast.info('Vui lòng đăng nhập để thêm video vào playlist');
+      return;
+    }
+    setIsPlaylistModalOpen(true);
+  };
+
+  const handleAddToPlaylist = async (playlistId: string) => {
+    if (!videoId || !video) return;
+
+    try {
+      await editVideoPlaylistMutation.mutateAsync({
+        playlistId,
+        data: {
+          videos: [video]
+        }
+      });
+      toast.success('Đã thêm video vào playlist!');
+      setIsPlaylistModalOpen(false);
+    } catch (error) {
+      toast.error('Không thể thêm video vào playlist');
     }
   };
 
@@ -248,6 +322,8 @@ const WatchPage = () => {
     return <div>Video not found</div>;
   }
 
+  console.log(video.avatarUrl, video.displayName)
+
   return (
     <div className="space-y-6">
       {/* Video Player Section */}
@@ -268,11 +344,11 @@ const WatchPage = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={`https://d1bapesvzv4qyl.cloudfront.net/avatars/${video.userId}.jpg`} />
-                <AvatarFallback>{video.userId.slice(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={video.avatarUrl} />
+                <AvatarFallback>{video.displayName}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{video.userId}</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{video.displayName}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{formatViews(subscribersCount)} subscribers</p>
               </div>
             </div>
@@ -287,6 +363,9 @@ const WatchPage = () => {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mr-2">
+              {formatViews(video.views)} views
+            </div>
             <Button
               variant={isLiked ? "default" : "outline"}
               size="sm"
@@ -320,9 +399,19 @@ const WatchPage = () => {
                   <Clock className="h-4 w-4 mr-2" />
                   {isWatchLaterLoading ? '...' : isInWatchLater ? 'Xóa khỏi xem sau' : 'Thêm vào xem sau'}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem
+                  onClick={handleOpenPlaylistDialog}
+                  className="cursor-pointer"
+                >
                   <ListPlus className="h-4 w-4 mr-2" />
                   Thêm vào playlist
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleShareVideo}
+                  className="cursor-pointer"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Chia sẻ
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -337,8 +426,6 @@ const WatchPage = () => {
         <CardContent className="pt-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <span>{formatViews(video.views)} views</span>
-              <span>•</span>
               <span>{formatDate(video.publishAt)}</span>
               <span>•</span>
               <span>{likesCount} like{likesCount !== 1 ? 's' : ''}</span>
@@ -463,6 +550,92 @@ const WatchPage = () => {
           </div>
         )}
       </div>
+
+      {/* Share Modal */}
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent className="w-full max-w-sm p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ video</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Copy Link */}
+            <div className="flex flex-col gap-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-muted/30">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Link video</p>
+              <div className="flex items-center gap-2 overflow-x-auto">
+                <span className="text-sm text-gray-900 dark:text-gray-100 break-all select-all flex-1 min-w-0">
+                  {`${window.location.origin}/watch/${videoId}`}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleCopyLink}
+                  className="flex-shrink-0 flex items-center gap-2"
+                >
+                  <Copy className="h-4 w-4" />
+                  Sao chép
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Playlist Selection Modal */}
+      <Dialog open={isPlaylistModalOpen} onOpenChange={setIsPlaylistModalOpen}>
+        <DialogContent className="w-full max-w-sm p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle>Chọn playlist</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {isLoadingPlaylists ? (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <Skeleton className="h-12 w-12 rounded" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : playlistsData?.playlists && playlistsData.playlists.length > 0 ? (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {playlistsData.playlists.map((playlist) => (
+                  <button
+                    key={playlist.id}
+                    onClick={() => handleAddToPlaylist(playlist.id)}
+                    disabled={editVideoPlaylistMutation.isPending}
+                    className="w-full flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+                  >
+                    <img
+                      src={playlist.thumbnailUrl || "https://cdn-icons-png.flaticon.com/512/1179/1179069.png"}
+                      alt={playlist.title}
+                      className="h-12 w-12 object-cover rounded"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {playlist.title}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {playlist.videos?.length || 0} video{playlist.videos?.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    {editVideoPlaylistMutation.isPending && (
+                      <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <p>Bạn chưa có playlist nào.</p>
+                <p className="text-sm mt-1">Tạo playlist mới để thêm video.</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

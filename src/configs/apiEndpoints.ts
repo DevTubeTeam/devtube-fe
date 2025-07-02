@@ -14,6 +14,9 @@ const API_ENDPOINTS = {
     VERIFY_ID_TOKEN: '/auth/verify',
     CHECK_SESSION: '/auth/check-session',
     ME: '/auth/me',
+    UPDATE_USER_PROFILE: '/auth/profile/update',
+    GET_USER_PROFILE: '/auth/profile',
+    CREATE_AVATAR_PRESIGNED_URL: '/auth/avatar/presigned-url',
   },
   USER: {
     PROFILE: '/user/profile',

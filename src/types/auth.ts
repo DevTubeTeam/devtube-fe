@@ -9,7 +9,7 @@ export interface IGoogleCallBackToken {
   idToken: string;
 }
 
-export interface IGoogleCallBackUser {
+export interface IAuthenticatedUser {
   id: string;
   avatarUrl: string;
   displayName: string;
@@ -18,7 +18,7 @@ export interface IGoogleCallBackUser {
 }
 
 export interface IGoogleCallbackResponse {
-  user: IGoogleCallBackUser;
+  user: IAuthenticatedUser;
   returnUrl: string;
 }
 
@@ -83,4 +83,35 @@ export interface IGetSubscribedChannelsResponse {
   totalCount: number;
   page: number;
   limit: number;
+}
+
+export interface IGetUserProfileResponse {
+  displayName: string;
+  avatarUrl: string;
+  email: string;
+  isVerified: boolean;
+  description: string;
+}
+
+export interface IUpdateUserProfileRequest {
+  displayName?: string;
+  avatarUrl?: string;
+  description?: string;
+}
+
+export interface IUpdateUserProfileResponse {
+  userId: string;
+  isUpdated: boolean;
+}
+
+export interface IAvatarPresignedUrlRequest {
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+}
+
+export interface IAvatarPresignedUrlResponse {
+  presignedUrl: string;
+  key: string;
+  bucketName: string;
 }

@@ -1,13 +1,13 @@
-import { IGoogleCallbackRequest, IGoogleCallBackUser } from '@/types/auth';
+import { IAuthenticatedUser, IGoogleCallbackRequest } from '@/types/auth';
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useLogin } from '../hooks';
 import { storageUtil } from '../utils';
 interface IAuthContext {
-  user: IGoogleCallBackUser | null;
+  user: IAuthenticatedUser | null;
   isAuthenticated: boolean;
-  setUser: (user: IGoogleCallBackUser | null) => void;
+  setUser: (user: IAuthenticatedUser | null) => void;
   handleGoogleCallback: (request: any) => void;
   handleLogout: () => void;
 
@@ -30,7 +30,7 @@ export const useAuth = () => {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<IGoogleCallBackUser | null>(null);
+  const [user, setUser] = useState<IAuthenticatedUser | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -118,6 +118,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               case 'REFRESH_TOKEN_INVALID':
                 handleLogout();
                 break;
+              case 'ID_TOKEN_INVALID':
+                handleLogout();
+                break;
               default:
                 console.error('Unexpected status detail during session check:', statusDetail);
                 navigate('/auth', { replace: true });
@@ -126,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
         onError: (error) => {
           console.error('Error during session check mutation:', error);
-          
+
         }
       });
     };

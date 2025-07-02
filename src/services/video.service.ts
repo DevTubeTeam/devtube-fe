@@ -84,7 +84,7 @@ const videoService = {
     try {
       const endpoint = API_ENDPOINTS.VIDEO.PLAYLIST;
       const response = await api.post(endpoint, data, { withCredentials: true });
-      if (response.data.statusCode !== 200) {
+      if (response.data.statusCode !== 201) {
         throw new Error(response.data.message || 'Failed to create playlist');
       }
       return response.data;

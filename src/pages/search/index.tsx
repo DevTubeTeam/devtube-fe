@@ -79,12 +79,12 @@ const SearchVideoCard = ({ video }: { video: IVideoMetadata }) => {
         <div className="flex items-center gap-2 mb-2">
           <div className="w-6 h-6 rounded-full overflow-hidden">
             <img
-              src={`https://d1bapesvzv4qyl.cloudfront.net/avatars/${video.userId}.jpg`}
+              src={video.avatarUrl}
               alt={video.userId}
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="text-sm text-gray-700 dark:text-gray-300">{video.userId}</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{video.displayName}</span>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
           {video.description}

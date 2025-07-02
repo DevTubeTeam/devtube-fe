@@ -88,7 +88,7 @@ export const RelatedVideos = ({ videoId }: RelatedVideosProps) => {
                                     {relatedVideo.title}
                                 </h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    {relatedVideo.userId}
+                                    {relatedVideo.displayName}
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                     {formatDate(relatedVideo.publishAt)}
