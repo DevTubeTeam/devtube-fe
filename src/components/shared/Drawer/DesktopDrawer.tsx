@@ -1,6 +1,6 @@
 import { useUser } from '@/hooks/useUser';
 import { cn } from '@/utils';
-import { BookOpen, ChevronDown, ChevronUp, History, Home, ListVideo, Loader2, PlaySquare, Settings, Star, ThumbsUp, Users } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronUp, Home, ListVideo, Loader2, PlaySquare, Star, ThumbsUp, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
@@ -39,16 +39,12 @@ const DesktopDrawer: React.FC = () => {
   ];
 
   const libraryItems: MenuItemType[] = [
-    { key: 'history', icon: <History size={18} />, label: 'Video đã xem', path: ROUTES.HISTORY },
     { key: 'playlists', icon: <BookOpen size={18} />, label: 'Danh sách phát', path: ROUTES.PLAYLISTS },
     { key: 'your-videos', icon: <Users size={18} />, label: 'Video của bạn', path: ROUTES.DASHBOARD_VIDEOS },
     { key: 'watch-later', icon: <Star size={18} />, label: 'Xem sau', path: ROUTES.WATCH_LATER },
     { key: 'liked', icon: <ThumbsUp size={18} />, label: 'Video đã thích', path: ROUTES.LIKED },
   ];
 
-  const footerItems: MenuItemType[] = [
-    { key: 'settings', icon: <Settings size={18} />, label: 'Cài đặt', path: ROUTES.DASHBOARD_SETTINGS },
-  ];
 
   const renderMenuItem = (item: MenuItemType) => {
     const isActive = currentPath === item.path;
@@ -198,12 +194,7 @@ const DesktopDrawer: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="border-t border-border my-2" />
 
-        {/* Section: Cài đặt */}
-        <div className="space-y-1">
-          {footerItems.map(renderMenuItem)}
-        </div>
       </div>
     </div>
   );
