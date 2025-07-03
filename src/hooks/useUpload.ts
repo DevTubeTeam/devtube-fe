@@ -212,7 +212,8 @@ export function useUpload(options: UploadOptions = {}) {
       const presignedRequest: IThumbnailPresignedUrlRequest = {
         videoId,
         fileName: thumbnail.name,
-        fileType: thumbnail.type
+        fileType: thumbnail.type,
+        fileSize: thumbnail.size
       };
       const presignedResponse = await videoService.createThumbnailPresignedUrl(presignedRequest);
       const presignedData: IThumbnailPresignedUrlResponse = presignedResponse.data;

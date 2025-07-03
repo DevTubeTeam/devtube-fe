@@ -18,6 +18,7 @@ export interface IThumbnailPresignedUrlRequest {
   videoId: string;
   fileName: string;
   fileType: string;
+  fileSize: number;
 }
 
 export interface IThumbnailPresignedUrlResponse {
