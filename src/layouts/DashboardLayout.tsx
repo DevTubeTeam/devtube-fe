@@ -2,16 +2,7 @@ import { ModeToggle } from '@/components/common/ModeToggle';
 import UserMenu from '@/components/shared/Navbar/UserMenu';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Bell,
-  ChevronLeft,
-  Film,
-  Layers,
-  ListVideo,
-  Menu,
-  User,
-  Video
-} from 'lucide-react';
+import { Bell, ChevronLeft, Film, Layers, ListVideo, Menu, User, Video } from 'lucide-react';
 import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
@@ -43,7 +34,6 @@ export const DashboardLayout = () => {
     },
   ];
 
-
   // Tiêu đề động theo route
   const getTitle = () => {
     if (location.pathname === '/dashboard') return 'Video của tôi';
@@ -73,9 +63,7 @@ export const DashboardLayout = () => {
       >
         {/* Sidebar Header */}
         <div className={`flex h-16 items-center justify-between border-b-0 px-4`}>
-          {!isCollapsed && (
-            <span className={`text-xl font-bold tracking-tight`}>DevHub Studio</span>
-          )}
+          {!isCollapsed && <span className={`text-xl font-bold tracking-tight`}>DevHub Studio</span>}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={`rounded p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800`}
@@ -120,7 +108,9 @@ export const DashboardLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <div className={`flex-1 ${isCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300 bg-neutral-50 dark:bg-neutral-950`}>
+      <div
+        className={`flex-1 ${isCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300 bg-neutral-50 dark:bg-neutral-950`}
+      >
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b px-4 shadow-sm bg-white/80 dark:bg-neutral-900/80 backdrop-blur">
           <div className="flex items-center gap-2">
@@ -135,38 +125,15 @@ export const DashboardLayout = () => {
             >
               Trang chủ
             </Link>
-
             {/* Theme toggle */}
             <ModeToggle />
-
-            {/* Notification Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="rounded-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 relative">
-                  <Bell size={20} />
-                  {/* Badge số lượng nếu có */}
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">3</span>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 p-0">
-                <div className="p-2 font-semibold border-b">Thông báo</div>
-                <ScrollArea className="max-h-72">
-                  {/* Danh sách thông báo mock/demo */}
-                  {[...Array(10)].map((_, i) => (
-                    <DropdownMenuItem key={i} className="flex flex-col items-start gap-1 py-3 px-4 border-b last:border-b-0">
-                      <div className="font-medium">Thông báo {i + 1}</div>
-                      <div className="text-xs text-muted-foreground">Vừa xong</div>
-                    </DropdownMenuItem>
-                  ))}
-                </ScrollArea>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             {/* User Icon - vào profile */}
-            <Link to={ROUTES.DASHBOARD_PROFILE} className="rounded-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+            <Link
+              to={ROUTES.DASHBOARD_PROFILE}
+              className="rounded-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            >
               <User size={20} />
             </Link>
-
             {/* Logout */}
             <UserMenu /> {/* Hoặc custom nút logout riêng nếu muốn */}
           </div>
