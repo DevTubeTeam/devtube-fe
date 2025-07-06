@@ -25,7 +25,7 @@ export function useVideo() {
             queryKey: ['myVideos'],
             queryFn: async () => {
                 const response = await videoService.getMyVideos();
-                return response.data;
+                return response.data || [];
             },
             refetchInterval: 5000, // Poll every 5 seconds
         });

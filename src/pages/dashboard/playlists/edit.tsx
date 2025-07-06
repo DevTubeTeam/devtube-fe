@@ -230,7 +230,7 @@ const DashboardPlaylistsEditPage = () => {
         return <div>Không tìm thấy playlist</div>;
     }
 
-    const videos = myVideos;
+    const videos = myVideos || [];
 
     // Để biết video nào đã chọn
     const selectedVideoIds = selectedVideos.map((v) => v.id);
