@@ -67,6 +67,13 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
         setDeleteDialogOpen(true);
     };
 
+    // Xác nhận xóa playlist
+  const confirmDeleteVideo = () => {
+    if (video.id) {
+      deleteVideo();
+    }
+  };
+
     // Mở dialog thêm vào playlist
     const handleOpenPlaylistDialog = () => {
         setPlaylistDialogOpen(true);
@@ -358,70 +365,26 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
                 </DialogContent>
             </Dialog>
 
-            {/* Dialog xóa video */}
-            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Trash2 className="w-5 h-5 text-red-500" />
-                            Xóa video
-                        </DialogTitle>
-                        <DialogDescription>
-                            Bạn có chắc chắn muốn xóa video "{video.title}" không?
-                        </DialogDescription>
-                    </DialogHeader>
+            {/* Dialog xác nhận xóa */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xóa playlist</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa video <b>{video.title}</b> không? Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteVideo} disabled={isDeleting}>
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>{/* Dialog xóa video */}
 
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
-                        <div
-                            className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
-                        >
-                                <Checkbox
-                                    id={video.id}
-                                    checked={selectedPlaylists.includes(video.id)}
-                                    onCheckedChange={() => handlePlaylistToggle(video.id)}
-                                />
-                                <div className="flex-1 min-w-0">
-                                    <label
-                                        htmlFor={video.id}
-                                        className="text-sm font-medium leading-none cursor-pointer block truncate"
-                                    >
-                                        {video.title}
-                                    </label>
-                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                                        {video.description || 'Không có mô tả'}
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <Eye className="w-3 h-3" />
-                                    <span>{formatViews(video.views)}</span>
-                                </div>
-                            </div>
-                    </div>
-
-                    <DialogFooter className="gap-2">
-                        <Button variant="outline" onClick={() => setPlaylistDialogOpen(false)}>
-                            Hủy
-                        </Button>
-                        <Button
-                            onClick={handleDeleteVideo}
-                            disabled={isDeleting}
-                            className="bg-orange-500 hover:bg-orange-600"
-                        >
-                            {isDeleting ? (
-                                <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                    Đang xóa...
-                                </>
-                            ) : (
-                                <>
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Xóa video
-                                </>
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </>
     );
 };
