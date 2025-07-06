@@ -20,14 +20,17 @@ interface DashboardVideoCardProps {
 
 const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
     const navigate = useNavigate();
-    const { usePublishVideo, useGetPlaylists, useEditVideoPlaylist } = useVideo();
+    const { usePublishVideo, useGetPlaylists, useEditVideoPlaylist, useDeleteVideo } = useVideo();
     const { mutateAsync: publishVideo, isPending: isPublishing } = usePublishVideo(video.id);
     const { data: playlistsData } = useGetPlaylists();
     const { mutateAsync: editVideoPlaylist, isPending: isAddingToPlaylist } = useEditVideoPlaylist();
+    const { mutateAsync: deleteVideo, isPending: isDeleting } = useDeleteVideo(video.id);
     const [isChecking, setIsChecking] = useState(false);
+
 
     // State cho dialog thêm vào playlist
     const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedPlaylists, setSelectedPlaylists] = useState<string[]>([]);
 
     const handleWatch = async (e: React.MouseEvent) => {
@@ -58,6 +61,10 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
         } catch (error) {
             toast.error('Không thể xuất bản video');
         }
+    };
+
+    const handleDeleteVideo = async () => {
+        setDeleteDialogOpen(true);
     };
 
     // Mở dialog thêm vào playlist
@@ -268,7 +275,7 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
                                     </div>
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer">
+                            <DropdownMenuItem onClick={() => handleDeleteVideo()} className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer">
                                 <div className="w-8 h-8 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
                                     <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
                                 </div>
@@ -344,6 +351,71 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
                                 <>
                                     <Plus className="w-4 h-4 mr-2" />
                                     Thêm vào {selectedPlaylists.length} playlist
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Dialog xóa video */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-red-500" />
+                            Xóa video
+                        </DialogTitle>
+                        <DialogDescription>
+                            Bạn có chắc chắn muốn xóa video "{video.title}" không?
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                        <div
+                            className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
+                        >
+                                <Checkbox
+                                    id={video.id}
+                                    checked={selectedPlaylists.includes(video.id)}
+                                    onCheckedChange={() => handlePlaylistToggle(video.id)}
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <label
+                                        htmlFor={video.id}
+                                        className="text-sm font-medium leading-none cursor-pointer block truncate"
+                                    >
+                                        {video.title}
+                                    </label>
+                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                                        {video.description || 'Không có mô tả'}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <Eye className="w-3 h-3" />
+                                    <span>{formatViews(video.views)}</span>
+                                </div>
+                            </div>
+                    </div>
+
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => setPlaylistDialogOpen(false)}>
+                            Hủy
+                        </Button>
+                        <Button
+                            onClick={handleDeleteVideo}
+                            disabled={isDeleting}
+                            className="bg-orange-500 hover:bg-orange-600"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Xóa video
                                 </>
                             )}
                         </Button>
