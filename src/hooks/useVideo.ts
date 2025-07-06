@@ -81,7 +81,7 @@ export function useVideo() {
         return useMutation({
             mutationFn: async () => {
                 if (!videoId) throw new Error('Missing video ID');
-                const deleteRequest: IDeleteObjectRequest = { videoId };
+                const deleteRequest: IDeleteObjectRequest = { id: videoId };
                 await videoService.deleteObject(deleteRequest);
                 return true;
             },

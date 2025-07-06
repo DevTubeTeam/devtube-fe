@@ -64,7 +64,7 @@ export interface IAbortUploadResponse {
 }
 
 export interface IDeleteObjectRequest {
-  videoId: string;
+  id: string;
 }
 
 export interface IDeleteObjectResponse {
