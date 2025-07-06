@@ -68,10 +68,6 @@ const UserMenu: React.FC = () => {
             <FolderIcon className="mr-2 h-4 w-4" />
             Danh sách phát
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate(`${ROUTES.DASHBOARD}/saved`)}>
-            <BookmarkIcon className="mr-2 h-4 w-4" />
-            Video đã lưu
-          </DropdownMenuItem>
           <DropdownMenuSeparator />
 
           {/* Đăng xuất */}

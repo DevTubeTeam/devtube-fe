@@ -20,7 +20,6 @@ const Playlists = lazy(() => import('@/pages/playlist'));
 const PlaylistEdit = lazy(() => import('@/pages/playlist/edit'));
 const UserSettings = lazy(() => import('@/pages/dashboard/settings'));
 const UserProfile = lazy(() => import('@/pages/dashboard/profile'));
-const SavedVideo = lazy(() => import('@/pages/dashboard/saved'));
 const DashboardPlaylistsEditPage = lazy(() => import('@/pages/dashboard/playlists/edit'));
 const ChannelListPage = lazy(() => import('@/pages/channels'));
 const SavedPage = lazy(() => import('@/pages/saved'));
@@ -138,7 +137,6 @@ export const appRoutes: RouteObject[] = [
       { path: 'playlists/edit/:id', element: <DashboardPlaylistsEditPage /> },
       { path: 'settings', element: <UserSettings /> },
       { path: 'profile', element: <UserProfile /> },
-      { path: 'saved', element: <SavedVideo /> },
     ],
   },
   // Admin routes
