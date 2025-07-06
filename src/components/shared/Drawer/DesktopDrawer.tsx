@@ -1,9 +1,21 @@
 import { useUser } from '@/hooks/useUser';
 import { cn } from '@/utils';
-import { BookOpen, ChevronDown, ChevronUp, Home, ListVideo, Loader2, PlaySquare, Star, ThumbsUp, Users } from 'lucide-react';
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Home,
+  ListVideo,
+  Loader2,
+  PlaySquare,
+  Star,
+  ThumbsUp,
+  Users,
+} from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import { useAuth } from '@/contexts';
 
 const INITIAL_SHOW_COUNT = 10;
 
@@ -28,10 +40,15 @@ const DesktopDrawer: React.FC = () => {
   const navigate = useNavigate();
   const currentPath = location.pathname;
   const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   // Lấy danh sách channel đã subscribe
   const { useGetSubscribedChannels } = useUser();
-  const { data: subscribedChannelsData, isLoading: isSubscribedChannelsLoading, error: subscribedChannelsError } = useGetSubscribedChannels();
+  const {
+    data: subscribedChannelsData,
+    isLoading: isSubscribedChannelsLoading,
+    error: subscribedChannelsError,
+  } = useGetSubscribedChannels();
 
   const primaryNavItems: MenuItemType[] = [
     { key: 'home', icon: <Home size={18} />, label: 'Trang chủ', path: '/' },
@@ -44,7 +61,6 @@ const DesktopDrawer: React.FC = () => {
     { key: 'watch-later', icon: <Star size={18} />, label: 'Xem sau', path: ROUTES.WATCH_LATER },
     { key: 'liked', icon: <ThumbsUp size={18} />, label: 'Video đã thích', path: ROUTES.LIKED },
   ];
-
 
   const renderMenuItem = (item: MenuItemType) => {
     const isActive = currentPath === item.path;
@@ -72,9 +88,7 @@ const DesktopDrawer: React.FC = () => {
   // Sử dụng dữ liệu thực nếu có, nếu không dùng fallback
   const displayChannels = subscribedChannels.length > 0 ? subscribedChannels : fallbackSubscriptions;
 
-  const visibleSubscriptions = showAllSubscriptions
-    ? displayChannels
-    : displayChannels.slice(0, INITIAL_SHOW_COUNT);
+  const visibleSubscriptions = showAllSubscriptions ? displayChannels : displayChannels.slice(0, INITIAL_SHOW_COUNT);
 
   const hasMoreSubscriptions = displayChannels.length > INITIAL_SHOW_COUNT;
 
@@ -92,7 +106,7 @@ const DesktopDrawer: React.FC = () => {
             src={channel.thumbnailUrl || '/avatars/default-channel.png'}
             alt={channel.name}
             className="w-6 h-6 rounded-full mr-3 object-cover"
-            onError={(e) => {
+            onError={e => {
               e.currentTarget.src = '/avatars/default-channel.png';
             }}
           />
@@ -116,9 +130,7 @@ const DesktopDrawer: React.FC = () => {
       {/* Scroll area cho toàn bộ sidebar */}
       <div className="flex-1 overflow-y-auto custom-scrollbar px-2 py-4">
         {/* Section: Chính */}
-        <div className="mb-2 space-y-1">
-          {primaryNavItems.map(renderMenuItem)}
-        </div>
+        <div className="mb-2 space-y-1">{primaryNavItems.map(renderMenuItem)}</div>
         <div className="border-t border-border my-2" />
 
         {/* Section: Bạn */}
@@ -133,13 +145,15 @@ const DesktopDrawer: React.FC = () => {
           <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase">
             Kênh đăng ký
             {totalSubscribedCount > 0 && (
-              <span className="ml-2 text-xs text-muted-foreground">
-                ({totalSubscribedCount})
-              </span>
+              <span className="ml-2 text-xs text-muted-foreground">({totalSubscribedCount})</span>
             )}
           </h3>
           <div className="space-y-1">
-            {isSubscribedChannelsLoading ? (
+            {!isAuthenticated ? (
+              <div className="px-3 py-2">
+                <span className="text-sm text-muted-foreground">Bạn chưa đăng nhập</span>
+              </div>
+            ) : isSubscribedChannelsLoading ? (
               // Loading state
               <div className="px-3 py-2">
                 <div className="flex items-center space-x-3">
@@ -194,7 +208,6 @@ const DesktopDrawer: React.FC = () => {
             )}
           </div>
         </div>
-
       </div>
     </div>
   );

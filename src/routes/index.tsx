@@ -13,7 +13,6 @@ const Watch = lazy(() => import('@/pages/watch'));
 const Channel = lazy(() => import('@/pages/channel'));
 
 // Authenticated routes
-const Dashboard = lazy(() => import('@/pages/dashboard'));
 const MyVideos = lazy(() => import('@/pages/dashboard/videos'));
 const EditVideo = lazy(() => import('@/pages/dashboard/videos/edit'));
 const DashboardPlaylists = lazy(() => import('@/pages/dashboard/playlists'));
@@ -49,7 +48,9 @@ export const appRoutes: RouteObject[] = [
           {
             path: ROUTES.CHANNEL().slice(1),
             element: (
-              <Channel />
+              <ProtectedRoute role='user'>
+                <Channel />
+              </ProtectedRoute>
             ),
           },
           {
@@ -83,19 +84,35 @@ export const appRoutes: RouteObject[] = [
           },
           {
             path: ROUTES.CHANNELS,
-            element: <ChannelListPage />,
+            element: (
+              <ProtectedRoute role='user'>
+                <ChannelListPage />
+              </ProtectedRoute>
+            ),
           },
           {
             path: ROUTES.SAVED,
-            element: <SavedPage />,
+            element: (
+              <ProtectedRoute role='user'>
+                <SavedPage />
+              </ProtectedRoute>
+            ),
           },
           {
             path: ROUTES.WATCH_LATER,
-            element: <WatchLaterPage />,
+            element: (
+              <ProtectedRoute role='user'>
+                <WatchLaterPage />
+              </ProtectedRoute>
+            ),
           },
           {
             path: ROUTES.LIKED,
-            element: <LikedPage />
+            element: (
+              <ProtectedRoute role='user'>
+                <LikedPage />
+              </ProtectedRoute>
+            ),
           },
         ],
       },
@@ -114,7 +131,7 @@ export const appRoutes: RouteObject[] = [
 
     ),
     children: [
-      { path: '', element: <Dashboard /> },
+      { path: '', element: <MyVideos /> },
       { path: 'videos', element: <MyVideos /> },
       { path: 'videos/edit/:id', element: <EditVideo /> },
       { path: 'playlists', element: <DashboardPlaylists /> },
