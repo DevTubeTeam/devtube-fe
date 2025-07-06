@@ -24,12 +24,6 @@ export const DashboardLayout = () => {
   // Main navigation items (phần trên)
   const mainNavigationItems = [
     {
-      name: 'Tổng quan',
-      path: '/dashboard',
-      icon: <Video className="h-5 w-5" />,
-      description: 'Trang tổng quan kênh',
-    },
-    {
       name: 'Video của tôi',
       path: '/dashboard/videos',
       icon: <Film className="h-5 w-5" />,
@@ -52,7 +46,7 @@ export const DashboardLayout = () => {
 
   // Tiêu đề động theo route
   const getTitle = () => {
-    if (location.pathname === '/dashboard') return 'Tổng quan';
+    if (location.pathname === '/dashboard') return 'Video của tôi';
     if (location.pathname.startsWith('/dashboard/videos')) return 'Video của tôi';
     if (location.pathname.startsWith('/dashboard/playlists')) return 'Danh sách phát';
     if (location.pathname.startsWith('/dashboard/profile')) return 'Trang cá nhân';
