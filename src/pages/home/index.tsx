@@ -1,3 +1,4 @@
+import PageMeta from '@/components/common/PageMeta';
 import {
   Pagination,
   PaginationContent,
@@ -179,38 +180,44 @@ const HomePage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4">
-      <h1 className="text-2xl font-bold mb-3">Home Page</h1>
+    <>
+      <PageMeta
+        title="DevTube - Discover Amazing Videos"
+        description="Explore trending and popular videos on DevTube. Watch, share, and discover amazing content from creators around the world."
+      />
+      <div className="container mx-auto px-4 py-4">
+        <h1 className="text-2xl font-bold mb-3">Home Page</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {videos?.videos.map((video: IVideoMetadata) => (
-          <VideoCard key={video.id} video={video} />
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {videos?.videos.map((video: IVideoMetadata) => (
+            <VideoCard key={video.id} video={video} />
+          ))}
+        </div>
+
+        {/* Pagination */}
+        <div className="mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+
+              {renderPaginationItems()}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setPage((prev) => prev + 1)}
+                  className={!videos || videos.videos.length < limit ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
-
-      {/* Pagination */}
-      <div className="mt-8">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                className={page === 1 ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-
-            {renderPaginationItems()}
-
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => setPage((prev) => prev + 1)}
-                className={!videos || videos.videos.length < limit ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
-    </div>
+    </>
   );
 };
 

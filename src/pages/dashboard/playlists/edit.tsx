@@ -1,3 +1,4 @@
+import PageMeta from '@/components/common/PageMeta';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -236,195 +237,201 @@ const DashboardPlaylistsEditPage = () => {
     const selectedVideoIds = selectedVideos.map((v) => v.id);
 
     return (
-        <div className="w-full max-w-6xl mx-auto py-10 px-2 md:px-0">
-            <div className="flex items-center gap-3 mb-8">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => navigate("/dashboard/playlists")}
-                    className="rounded-full"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                </Button>
-                <h1 className="text-3xl font-bold tracking-tight">Chỉnh sửa Playlist</h1>
-            </div>
-            <form onSubmit={handleSave} className="space-y-8">
-                <Card className="p-8 shadow-lg border border-muted space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block font-semibold mb-2 text-muted-foreground">Tên playlist</label>
-                            <Input
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                required
-                                className="text-lg"
-                                placeholder="Nhập tên playlist..."
-                            />
-                        </div>
-                        <div>
-                            <label className="block font-semibold mb-2 text-muted-foreground">Mô tả</label>
-                            <Input
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Mô tả ngắn về playlist"
-                            />
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3 mt-2">
-                        <Checkbox
-                            checked={isPublic}
-                            onCheckedChange={(checked) => setIsPublic(Boolean(checked))}
-                            id="isPublic"
-                        />
-                        <label htmlFor="isPublic" className="text-sm font-medium select-none">
-                            Công khai playlist
-                        </label>
-                        <span className="text-xs text-muted-foreground ml-2">
-                            (Nếu tắt, chỉ bạn mới xem được playlist này)
-                        </span>
-                    </div>
-                </Card>
-
-                <Card className="p-6 shadow-lg border border-muted">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="font-semibold text-xl">Chọn video cho playlist</h2>
-                        <div className="text-sm text-muted-foreground">
-                            {selectedVideos.length} video đã chọn
-                        </div>
-                    </div>
-
-                    {(!videos || videos.length === 0) ? (
-                        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <p className="text-lg font-medium mb-2">Chưa có video nào</p>
-                            <p className="text-sm text-center max-w-sm">Bạn cần tạo video trước khi có thể thêm vào playlist</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>
-                                    Click vào video để chọn/bỏ chọn. Video đã chọn sẽ xuất hiện trong phần thứ tự bên dưới.
-                                </span>
-                            </div>
-
-                            {/* Danh sách tất cả video để chọn/bỏ chọn */}
+        <>
+            <PageMeta
+                title={playlistData?.playlist ? `Edit ${playlistData.playlist.title} - DevTube` : "Edit Playlist - DevTube"}
+                description="Edit playlist details and manage video order. Add, remove, and reorder videos in your playlist."
+            />
+            <div className="w-full max-w-6xl mx-auto py-10 px-2 md:px-0">
+                <div className="flex items-center gap-3 mb-8">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate("/dashboard/playlists")}
+                        className="rounded-full"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <h1 className="text-3xl font-bold tracking-tight">Chỉnh sửa Playlist</h1>
+                </div>
+                <form onSubmit={handleSave} className="space-y-8">
+                    <Card className="p-8 shadow-lg border border-muted space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <div className="font-semibold mb-2">Tất cả video của bạn</div>
-                                <ScrollArea className="h-[30rem] w-full rounded-md border">
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 p-4">
-                                        {videos.map((video: IVideoMetadata) => {
-                                            const checked = selectedVideoIds.includes(video.id);
-                                            return (
-                                                <div
-                                                    key={video.id}
-                                                    className={`relative group cursor-pointer rounded-xl border-2 transition-all duration-200 hover:shadow-md
-                                                        ${checked
-                                                            ? "border-primary bg-primary/5 shadow-sm"
-                                                            : "border-muted hover:border-primary/30 hover:bg-muted/30"
-                                                        }`}
-                                                    onClick={() => handleToggleVideo(video)}
-                                                    tabIndex={0}
-                                                    role="button"
-                                                    aria-pressed={checked}
-                                                >
-                                                    <div className="p-4">
-                                                        <div className="flex items-start gap-4">
-                                                            <div className="relative flex-shrink-0">
-                                                                <img
-                                                                    src={video.thumbnailUrl}
-                                                                    alt={video.title}
-                                                                    className="w-24 h-16 object-cover rounded-lg shadow-sm"
-                                                                />
-                                                                <div className={`absolute inset-0 rounded-lg border-2 transition-colors
-                                                                    ${checked ? "border-primary" : "border-transparent"}`}
-                                                                />
-                                                                {checked && (
-                                                                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                                                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                <label className="block font-semibold mb-2 text-muted-foreground">Tên playlist</label>
+                                <Input
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                    className="text-lg"
+                                    placeholder="Nhập tên playlist..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block font-semibold mb-2 text-muted-foreground">Mô tả</label>
+                                <Input
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Mô tả ngắn về playlist"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 mt-2">
+                            <Checkbox
+                                checked={isPublic}
+                                onCheckedChange={(checked) => setIsPublic(Boolean(checked))}
+                                id="isPublic"
+                            />
+                            <label htmlFor="isPublic" className="text-sm font-medium select-none">
+                                Công khai playlist
+                            </label>
+                            <span className="text-xs text-muted-foreground ml-2">
+                                (Nếu tắt, chỉ bạn mới xem được playlist này)
+                            </span>
+                        </div>
+                    </Card>
 
-                                                            <div className="flex-1 min-w-0">
-                                                                <h3 className="font-semibold text-base line-clamp-2 group-hover:text-primary transition-colors">
-                                                                    {video.title}
-                                                                </h3>
-                                                                <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                                                                    {video.description}
-                                                                </p>
-                                                                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                    </svg>
-                                                                    <span>Video</span>
+                    <Card className="p-6 shadow-lg border border-muted">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="font-semibold text-xl">Chọn video cho playlist</h2>
+                            <div className="text-sm text-muted-foreground">
+                                {selectedVideos.length} video đã chọn
+                            </div>
+                        </div>
+
+                        {(!videos || videos.length === 0) ? (
+                            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <p className="text-lg font-medium mb-2">Chưa có video nào</p>
+                                <p className="text-sm text-center max-w-sm">Bạn cần tạo video trước khi có thể thêm vào playlist</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>
+                                        Click vào video để chọn/bỏ chọn. Video đã chọn sẽ xuất hiện trong phần thứ tự bên dưới.
+                                    </span>
+                                </div>
+
+                                {/* Danh sách tất cả video để chọn/bỏ chọn */}
+                                <div>
+                                    <div className="font-semibold mb-2">Tất cả video của bạn</div>
+                                    <ScrollArea className="h-[30rem] w-full rounded-md border">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 p-4">
+                                            {videos.map((video: IVideoMetadata) => {
+                                                const checked = selectedVideoIds.includes(video.id);
+                                                return (
+                                                    <div
+                                                        key={video.id}
+                                                        className={`relative group cursor-pointer rounded-xl border-2 transition-all duration-200 hover:shadow-md
+                                                            ${checked
+                                                                ? "border-primary bg-primary/5 shadow-sm"
+                                                                : "border-muted hover:border-primary/30 hover:bg-muted/30"
+                                                            }`}
+                                                        onClick={() => handleToggleVideo(video)}
+                                                        tabIndex={0}
+                                                        role="button"
+                                                        aria-pressed={checked}
+                                                    >
+                                                        <div className="p-4">
+                                                            <div className="flex items-start gap-4">
+                                                                <div className="relative flex-shrink-0">
+                                                                    <img
+                                                                        src={video.thumbnailUrl}
+                                                                        alt={video.title}
+                                                                        className="w-24 h-16 object-cover rounded-lg shadow-sm"
+                                                                    />
+                                                                    <div className={`absolute inset-0 rounded-lg border-2 transition-colors
+                                                                        ${checked ? "border-primary" : "border-transparent"}`}
+                                                                    />
+                                                                    {checked && (
+                                                                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                                                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h3 className="font-semibold text-base line-clamp-2 group-hover:text-primary transition-colors">
+                                                                        {video.title}
+                                                                    </h3>
+                                                                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                                                        {video.description}
+                                                                    </p>
+                                                                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                        </svg>
+                                                                        <span>Video</span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </ScrollArea>
-                            </div>
-
-                            {/* Danh sách video đã chọn (có thể kéo thả để reorder) */}
-                            {selectedVideos.length > 0 && (
-                                <div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="font-semibold text-primary text-base flex items-center gap-2">
-                                            <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                            </svg>
-                                            Thứ tự video trong playlist
+                                                );
+                                            })}
                                         </div>
-                                        <span className="text-xs text-muted-foreground">
-                                            Kéo thả để sắp xếp lại thứ tự
-                                        </span>
-                                    </div>
-                                    <Card className="overflow-hidden border border-primary/20 shadow-none">
-                                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleSelectedVideosDragEnd}>
-                                            <SortableContext items={selectedVideos.map(v => v.id)} strategy={verticalListSortingStrategy}>
-                                                <div className="flex flex-col gap-3 p-2">
-                                                    {selectedVideos.map((video, idx) => (
-                                                        <SortableItem
-                                                            key={video.id}
-                                                            video={video}
-                                                            index={idx}
-                                                            onRemove={handleToggleVideo}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </SortableContext>
-                                        </DndContext>
-                                    </Card>
+                                    </ScrollArea>
                                 </div>
-                            )}
-                        </div>
-                    )}
-                </Card>
 
-                <div className="flex justify-end">
-                    <Button
-                        type="submit"
-                        className="px-10 py-2 text-base font-semibold rounded-lg"
-                        disabled={updatePlaylist.isPending || editVideoPlaylist.isPending}
-                    >
-                        {updatePlaylist.isPending || editVideoPlaylist.isPending ? "Đang lưu..." : "Lưu thay đổi"}
-                    </Button>
-                </div>
-            </form>
-        </div>
+                                {/* Danh sách video đã chọn (có thể kéo thả để reorder) */}
+                                {selectedVideos.length > 0 && (
+                                    <div>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="font-semibold text-primary text-base flex items-center gap-2">
+                                                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                                </svg>
+                                                Thứ tự video trong playlist
+                                            </div>
+                                            <span className="text-xs text-muted-foreground">
+                                                Kéo thả để sắp xếp lại thứ tự
+                                            </span>
+                                        </div>
+                                        <Card className="overflow-hidden border border-primary/20 shadow-none">
+                                            <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleSelectedVideosDragEnd}>
+                                                <SortableContext items={selectedVideos.map(v => v.id)} strategy={verticalListSortingStrategy}>
+                                                    <div className="flex flex-col gap-3 p-2">
+                                                        {selectedVideos.map((video, idx) => (
+                                                            <SortableItem
+                                                                key={video.id}
+                                                                video={video}
+                                                                index={idx}
+                                                                onRemove={handleToggleVideo}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </SortableContext>
+                                            </DndContext>
+                                        </Card>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </Card>
+
+                    <div className="flex justify-end">
+                        <Button
+                            type="submit"
+                            className="px-10 py-2 text-base font-semibold rounded-lg"
+                            disabled={updatePlaylist.isPending || editVideoPlaylist.isPending}
+                        >
+                            {updatePlaylist.isPending || editVideoPlaylist.isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </>
     );
 };
 

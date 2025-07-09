@@ -1,3 +1,4 @@
+import PageMeta from '@/components/common/PageMeta';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,119 +82,125 @@ const UserProfile = () => {
     }
 
     return (
-        <div className="max-w-2xl mx-auto mt-8">
-            {/* Cover Banner */}
-            <div className="relative h-56 md:h-72 rounded-t-2xl overflow-hidden bg-gradient-to-r from-blue-400 to-purple-500 shadow-lg">
-                <img
-                    src={DEFAULT_COVER}
-                    alt="cover"
-                    className="w-full h-full object-cover object-center opacity-80"
-                />
-                {/* Avatar nổi */}
-                <div className="absolute left-1/2 bottom-1/8 -bottom-16 transform -translate-x-1/2 z-10">
-                    <div className="relative">
-                        <Avatar className="w-32 h-32 border-4 border-white dark:border-neutral-900 shadow-xl bg-white dark:bg-neutral-900">
-                            <AvatarImage src={avatarPreview || avatarUrl} />
-                            <AvatarFallback>{displayName?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            ref={fileInputRef}
-                            onChange={handleAvatarChange}
-                            disabled={isUploading}
-                        />
-                        <Button
-                            variant="secondary"
-                            size="icon"
-                            className="absolute bottom-2 right-2 rounded-full shadow bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 hover:bg-blue-100 dark:hover:bg-neutral-800"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                        >
-                            {isUploading ? (
-                                <svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
-                            ) : (
-                                <Camera className="w-5 h-5 text-blue-600" />
+        <>
+            <PageMeta
+                title="Profile Settings - DevTube"
+                description="Manage your profile information, avatar, and account settings. Update your display name and description."
+            />
+            <div className="max-w-2xl mx-auto mt-8">
+                {/* Cover Banner */}
+                <div className="relative h-56 md:h-72 rounded-t-2xl overflow-hidden bg-gradient-to-r from-blue-400 to-purple-500 shadow-lg">
+                    <img
+                        src={DEFAULT_COVER}
+                        alt="cover"
+                        className="w-full h-full object-cover object-center opacity-80"
+                    />
+                    {/* Avatar nổi */}
+                    <div className="absolute left-1/2 bottom-1/8 -bottom-16 transform -translate-x-1/2 z-10">
+                        <div className="relative">
+                            <Avatar className="w-32 h-32 border-4 border-white dark:border-neutral-900 shadow-xl bg-white dark:bg-neutral-900">
+                                <AvatarImage src={avatarPreview || avatarUrl} />
+                                <AvatarFallback>{displayName?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                ref={fileInputRef}
+                                onChange={handleAvatarChange}
+                                disabled={isUploading}
+                            />
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="absolute bottom-2 right-2 rounded-full shadow bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 hover:bg-blue-100 dark:hover:bg-neutral-800"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploading}
+                            >
+                                {isUploading ? (
+                                    <svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                ) : (
+                                    <Camera className="w-5 h-5 text-blue-600" />
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Card thông tin */}
+                <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-b-2xl shadow-lg pt-28 pb-10 px-6 md:px-12 -mt-12 flex flex-col items-center">
+                    {/* Tên, email, badge xác thực */}
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="flex items-center gap-2">
+                            <span className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{displayName}</span>
+                            {user?.data?.isVerified && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 ml-1">
+                                    <CheckCircle className="w-4 h-4 mr-1 text-blue-500" /> Đã xác thực
+                                </span>
                             )}
-                        </Button>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1 text-gray-500 dark:text-gray-300">
+                            <Mail className="w-4 h-4 mr-1" />
+                            <span className="text-base">{user?.data?.email}</span>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            {/* Card thông tin */}
-            <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-b-2xl shadow-lg pt-28 pb-10 px-6 md:px-12 -mt-12 flex flex-col items-center">
-                {/* Tên, email, badge xác thực */}
-                <div className="flex flex-col items-center mb-6">
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{displayName}</span>
-                        {user?.data?.isVerified && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 ml-1">
-                                <CheckCircle className="w-4 h-4 mr-1 text-blue-500" /> Đã xác thực
-                            </span>
+                    {/* Form chỉnh sửa */}
+                    <div className="w-full max-w-md space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Tên hiển thị</label>
+                            <div className="relative">
+                                <Input
+                                    value={displayName}
+                                    onChange={e => {
+                                        setDisplayName(e.target.value);
+                                        setIsEditing(true);
+                                    }}
+                                    maxLength={50}
+                                    className="rounded-lg px-4 py-2 text-base pl-10 focus:ring-2 focus:ring-blue-400"
+                                    placeholder="Tên hiển thị của bạn"
+                                />
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Mô tả</label>
+                            <div className="relative">
+                                <Textarea
+                                    value={description}
+                                    onChange={e => {
+                                        setDescription(e.target.value);
+                                        setIsEditing(true);
+                                    }}
+                                    rows={4}
+                                    maxLength={200}
+                                    className="rounded-lg px-4 py-2 text-base pl-10 focus:ring-2 focus:ring-blue-400"
+                                    placeholder="Giới thiệu ngắn về bạn..."
+                                />
+                                <Info className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        className="mt-8 w-full py-3 px-4 bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-neutral-900 font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleSave}
+                        disabled={updateUserProfile.isPending || !isEditing || isUploading}
+                    >
+                        {updateUserProfile.isPending ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                Đang lưu...
+                            </>
+                        ) : (
+                            <>
+                                <CheckCircle className="w-5 h-5" />
+                                Lưu thay đổi
+                            </>
                         )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 text-gray-500 dark:text-gray-300">
-                        <Mail className="w-4 h-4 mr-1" />
-                        <span className="text-base">{user?.data?.email}</span>
-                    </div>
+                    </button>
                 </div>
-
-                {/* Form chỉnh sửa */}
-                <div className="w-full max-w-md space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Tên hiển thị</label>
-                        <div className="relative">
-                            <Input
-                                value={displayName}
-                                onChange={e => {
-                                    setDisplayName(e.target.value);
-                                    setIsEditing(true);
-                                }}
-                                maxLength={50}
-                                className="rounded-lg px-4 py-2 text-base pl-10 focus:ring-2 focus:ring-blue-400"
-                                placeholder="Tên hiển thị của bạn"
-                            />
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Mô tả</label>
-                        <div className="relative">
-                            <Textarea
-                                value={description}
-                                onChange={e => {
-                                    setDescription(e.target.value);
-                                    setIsEditing(true);
-                                }}
-                                rows={4}
-                                maxLength={200}
-                                className="rounded-lg px-4 py-2 text-base pl-10 focus:ring-2 focus:ring-blue-400"
-                                placeholder="Giới thiệu ngắn về bạn..."
-                            />
-                            <Info className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                        </div>
-                    </div>
-                </div>
-                <button
-                    className="mt-8 w-full py-3 px-4 bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-neutral-900 font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleSave}
-                    disabled={updateUserProfile.isPending || !isEditing || isUploading}
-                >
-                    {updateUserProfile.isPending ? (
-                        <>
-                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
-                            Đang lưu...
-                        </>
-                    ) : (
-                        <>
-                            <CheckCircle className="w-5 h-5" />
-                            Lưu thay đổi
-                        </>
-                    )}
-                </button>
             </div>
-        </div>
+        </>
     );
 };
 

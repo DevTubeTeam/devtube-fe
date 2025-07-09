@@ -1,3 +1,4 @@
+import PageMeta from '@/components/common/PageMeta';
 import { Button } from '@/components/ui/button';
 import { UploadVideoModal } from '@/components/upload';
 import { VideoEmptyState, VideoFilterBar, VideoGrid } from '@/components/video';
@@ -102,47 +103,53 @@ const MyVideosPage = () => {
   console.log('myVideos', myVideos);
 
   return (
-    <div className="container max-w-7xl mx-auto py-6 px-4 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Your Videos</h1>
-          <p className="text-muted-foreground">Manage and upload your videos</p>
-        </div>
-        <Button onClick={handleOpenUploadModal} className="md:w-auto w-full">
-          <Upload className="h-4 w-4 mr-2" />
-          Upload video
-        </Button>
-      </div>
-
-      <VideoFilterBar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        activeFilters={activeFilters}
-        toggleFilter={toggleFilter}
-        areAnyFiltersActive={areAnyFiltersActive}
-        clearAllFilters={clearAllFilters}
-        sortOption={sortOption}
-        setSortOption={setSortOption}
+    <>
+      <PageMeta
+        title="My Videos - DevTube"
+        description="Manage and organize your uploaded videos. Edit, publish, and track performance of your content."
       />
-
-      {error ? (
-        <div className="text-center py-12">
-          <p className="text-red-600">Error loading videos: {error.message}</p>
+      <div className="container max-w-7xl mx-auto py-6 px-4 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Your Videos</h1>
+            <p className="text-muted-foreground">Manage and upload your videos</p>
+          </div>
+          <Button onClick={handleOpenUploadModal} className="md:w-auto w-full">
+            <Upload className="h-4 w-4 mr-2" />
+            Upload video
+          </Button>
         </div>
-      ) : isMyVideosLoading ? (
-        <VideoGrid isLoading={true} videos={[]} />
-      ) : filteredAndSortedVideos?.length === 0 ? (
-        <VideoEmptyState searchQuery={searchQuery} handleOpenUploadModal={handleOpenUploadModal} />
-      ) : (
-        <VideoGrid
-          isLoading={false}
-          videos={filteredAndSortedVideos || []}
-          showEditDelete={true}
-        />
-      )}
 
-      <UploadVideoModal isOpen={isUploadModalOpen} onClose={handleCloseUploadModal} />
-    </div>
+        <VideoFilterBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          activeFilters={activeFilters}
+          toggleFilter={toggleFilter}
+          areAnyFiltersActive={areAnyFiltersActive}
+          clearAllFilters={clearAllFilters}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+        />
+
+        {error ? (
+          <div className="text-center py-12">
+            <p className="text-red-600">Error loading videos: {error.message}</p>
+          </div>
+        ) : isMyVideosLoading ? (
+          <VideoGrid isLoading={true} videos={[]} />
+        ) : filteredAndSortedVideos?.length === 0 ? (
+          <VideoEmptyState searchQuery={searchQuery} handleOpenUploadModal={handleOpenUploadModal} />
+        ) : (
+          <VideoGrid
+            isLoading={false}
+            videos={filteredAndSortedVideos || []}
+            showEditDelete={true}
+          />
+        )}
+
+        <UploadVideoModal isOpen={isUploadModalOpen} onClose={handleCloseUploadModal} />
+      </div>
+    </>
   );
 };
 

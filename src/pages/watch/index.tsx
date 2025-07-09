@@ -1,4 +1,5 @@
 import { GoogleLoginButton } from '@/components/auth/GoogleLoginButton';
+import PageMeta from '@/components/common/PageMeta';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -351,315 +352,321 @@ const WatchPage = () => {
   console.log(video.avatarUrl, video.displayName)
 
   return (
-    <div className="space-y-6 px-2 sm:px-0">
-      {/* Video Player Section */}
-      <div className="bg-black rounded-lg overflow-hidden">
-        <HLSVideoPlayer
-          source={video.videoUrl}
-          poster={video.thumbnailUrl}
-          className="w-full aspect-video"
-        />
-      </div>
-
-      {/* Video Info Section */}
-      <div className="space-y-3">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 break-words leading-tight mb-2">{video.title}</h1>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          {/* Channel Info + Subscribe */}
-          <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 w-full sm:w-auto">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={video.avatarUrl} />
-                <AvatarFallback>{video.displayName}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{video.displayName}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(subscribersCount)} subscribers</p>
-              </div>
-            </div>
-            <Button
-              variant={isSubscribed ? "outline" : "secondary"}
-              size="sm"
-              onClick={handleSubscribeToggle}
-              disabled={isSubscribeLoading}
-              className="w-full xs:w-auto"
-            >
-              {isSubscribeLoading ? '...' : isSubscribed ? 'Subscribed' : 'Subscribe'}
-            </Button>
-          </div>
-          {/* Actions */}
-          <div className="flex flex-nowrap overflow-x-auto gap-2 py-1 w-full sm:w-auto">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mr-2 min-w-max">
-              {formatViews(video.views)} views
-            </div>
-            <Button
-              variant={isLiked ? "default" : "outline"}
-              size="sm"
-              className={`gap-2 min-w-max ${isLiked ? 'bg-gray-900 hover:bg-gray-800 text-white border-gray-900 dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900 dark:border-gray-100' : ''}`}
-              onClick={handleLikeToggle}
-              disabled={isLikeLoading}
-            >
-              <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-              {isLikeLoading ? '...' : `${likesCount} Like${likesCount !== 1 ? 's' : ''}`}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="min-w-max">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={handleSaveToggle}
-                  disabled={isSaveLoading}
-                  className="cursor-pointer"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSaveLoading ? '...' : isSaved ? 'Bỏ lưu video' : 'Lưu video'}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleWatchLaterToggle}
-                  disabled={isWatchLaterLoading}
-                  className="cursor-pointer"
-                >
-                  <Clock className="h-4 w-4 mr-2" />
-                  {isWatchLaterLoading ? '...' : isInWatchLater ? 'Xóa khỏi xem sau' : 'Thêm vào xem sau'}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleOpenPlaylistDialog}
-                  className="cursor-pointer"
-                >
-                  <ListPlus className="h-4 w-4 mr-2" />
-                  Thêm vào playlist
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleShareVideo}
-                  className="cursor-pointer"
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Chia sẻ
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+    <>
+      <PageMeta
+        title={video ? `${video.title} - DevTube` : "Video - DevTube"}
+        description={video ? `${video.description.substring(0, 160)}...` : "Watch amazing videos on DevTube"}
+      />
+      <div className="space-y-6 px-2 sm:px-0">
+        {/* Video Player Section */}
+        <div className="bg-black rounded-lg overflow-hidden">
+          <HLSVideoPlayer
+            source={video.videoUrl}
+            poster={video.thumbnailUrl}
+            className="w-full aspect-video"
+          />
         </div>
-      </div>
 
-      <Separator />
-
-      {/* Video Description */}
-      <Card>
-        <CardContent className="pt-4 pb-2 px-2 sm:px-6">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              <span>{formatDate(video.publishAt)}</span>
-              <span>•</span>
-              <span>{likesCount} like{likesCount !== 1 ? 's' : ''}</span>
-            </div>
-            <div className="relative">
-              <p className={`text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${!isDescriptionExpanded && video.description.length > 120 ? 'line-clamp-2 sm:line-clamp-3' : ''}`}>{video.description}</p>
-              {video.description.length > 120 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="mt-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                >
-                  {isDescriptionExpanded ? (
-                    <>
-                      Show less <ChevronUp className="ml-1 h-4 w-4" />
-                    </>
-                  ) : (
-                    <>
-                      Show more <ChevronDown className="ml-1 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Comments Section */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Comments ({comments?.comments?.length || 0})
-        </h2>
-
-        {/* Comment Input Box */}
-        {isAuthenticated ? (
-          <div className="flex flex-col xs:flex-row gap-2 items-start mb-2">
-            <Avatar className="h-10 w-10 mt-1 mx-auto xs:mx-0">
-              <AvatarImage src={user?.avatarUrl || `https://d1bapesvzv4qyl.cloudfront.net/avatars/${user?.id}.jpg`} />
-              <AvatarFallback>{(user?.displayName || user?.id || '').slice(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 w-full">
-              <Textarea
-                placeholder="Add a comment..."
-                value={commentContent}
-                onChange={e => setCommentContent(e.target.value)}
-                minLength={1}
-                maxLength={500}
-                className="mb-2 w-full"
-                rows={2}
-                disabled={createCommentMutation.isPending}
-              />
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    if (commentContent.trim().length === 0) return;
-                    createCommentMutation.mutate({ content: commentContent }, {
-                      onSuccess: () => setCommentContent('')
-                    });
-                  }}
-                  disabled={commentContent.trim().length === 0 || createCommentMutation.isPending}
-                >
-                  {createCommentMutation.isPending ? 'Posting...' : 'Comment'}
-                </Button>
-              </div>
-              {createCommentMutation.isError && (
-                <div className="text-red-500 text-sm mt-1">Failed to post comment. Please try again.</div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="mb-2">
-            <GoogleLoginButton />
-          </div>
-        )}
-
-        {isLoadingComments ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, index) => (
-              <div key={index} className="flex gap-4">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-full" />
+        {/* Video Info Section */}
+        <div className="space-y-3">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 break-words leading-tight mb-2">{video.title}</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* Channel Info + Subscribe */}
+            <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 w-full sm:w-auto">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={video.avatarUrl} />
+                  <AvatarFallback>{video.displayName}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{video.displayName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(subscribersCount)} subscribers</p>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : comments?.comments && comments.comments.length > 0 ? (
-          <ScrollArea className="h-[400px] rounded-md border border-gray-200 dark:border-gray-800">
-            <div className="p-4 space-y-4">
-              {comments.comments.map((comment: IComment) => {
-                const userInfo = comments.users.find(u => u.id === comment.userId);
-                return (
-                  <div key={comment.id} className="flex gap-4">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={userInfo?.avatar || `https://d1bapesvzv4qyl.cloudfront.net/avatars/${userInfo?.id || comment.userId}.jpg`} />
-                      <AvatarFallback>{(userInfo?.name || userInfo?.id || comment.userId).slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium text-gray-900 dark:text-gray-100">{userInfo?.name || userInfo?.id || comment.userId}</p>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {formatDate(comment.createdAt)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
-                    </div>
-                  </div>
-                );
-              })}
+              <Button
+                variant={isSubscribed ? "outline" : "secondary"}
+                size="sm"
+                onClick={handleSubscribeToggle}
+                disabled={isSubscribeLoading}
+                className="w-full xs:w-auto"
+              >
+                {isSubscribeLoading ? '...' : isSubscribed ? 'Subscribed' : 'Subscribe'}
+              </Button>
             </div>
-          </ScrollArea>
-        ) : (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            No comments yet. Be the first to comment!
-          </div>
-        )}
-      </div>
-
-      {/* Share Modal */}
-      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-        <DialogContent className="w-full max-w-full sm:max-w-sm p-2 sm:p-6">
-          <DialogHeader>
-            <DialogTitle>Chia sẻ video</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {/* Copy Link */}
-            <div className="flex flex-col gap-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-muted/30">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Link video</p>
-              <div className="flex items-center gap-2 overflow-x-auto">
-                <span className="text-sm text-gray-900 dark:text-gray-100 break-all select-all flex-1 min-w-0">
-                  {`${window.location.origin}/watch/${videoId}`}
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCopyLink}
-                  className="flex-shrink-0 flex items-center gap-2"
-                >
-                  <Copy className="h-4 w-4" />
-                  Sao chép
-                </Button>
+            {/* Actions */}
+            <div className="flex flex-nowrap overflow-x-auto gap-2 py-1 w-full sm:w-auto">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mr-2 min-w-max">
+                {formatViews(video.views)} views
               </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Playlist Selection Modal */}
-      <Dialog open={isPlaylistModalOpen} onOpenChange={setIsPlaylistModalOpen}>
-        <DialogContent className="w-full max-w-full sm:max-w-sm p-2 sm:p-6">
-          <DialogHeader>
-            <DialogTitle>Chọn playlist</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {isLoadingPlaylists ? (
-              <div className="space-y-2">
-                {[...Array(3)].map((_, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <Skeleton className="h-12 w-12 rounded" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-24" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : playlistsData?.playlists && playlistsData.playlists.length > 0 ? (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {playlistsData.playlists.map((playlist) => (
-                  <button
-                    key={playlist.id}
-                    onClick={() => handleAddToPlaylist(playlist.id)}
-                    disabled={editVideoPlaylistMutation.isPending}
-                    className="w-full flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+              <Button
+                variant={isLiked ? "default" : "outline"}
+                size="sm"
+                className={`gap-2 min-w-max ${isLiked ? 'bg-gray-900 hover:bg-gray-800 text-white border-gray-900 dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900 dark:border-gray-100' : ''}`}
+                onClick={handleLikeToggle}
+                disabled={isLikeLoading}
+              >
+                <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                {isLikeLoading ? '...' : `${likesCount} Like${likesCount !== 1 ? 's' : ''}`}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="min-w-max">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={handleSaveToggle}
+                    disabled={isSaveLoading}
+                    className="cursor-pointer"
                   >
-                    <img
-                      src={playlist.thumbnailUrl || "https://cdn-icons-png.flaticon.com/512/1179/1179069.png"}
-                      alt={playlist.title}
-                      className="h-12 w-12 object-cover rounded"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                        {playlist.title}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {playlist.videos?.length || 0} video{playlist.videos?.length !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                    {editVideoPlaylistMutation.isPending && (
-                      <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <p>Bạn chưa có playlist nào.</p>
-                <p className="text-sm mt-1">Tạo playlist mới để thêm video.</p>
-              </div>
-            )}
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSaveLoading ? '...' : isSaved ? 'Bỏ lưu video' : 'Lưu video'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleWatchLaterToggle}
+                    disabled={isWatchLaterLoading}
+                    className="cursor-pointer"
+                  >
+                    <Clock className="h-4 w-4 mr-2" />
+                    {isWatchLaterLoading ? '...' : isInWatchLater ? 'Xóa khỏi xem sau' : 'Thêm vào xem sau'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleOpenPlaylistDialog}
+                    className="cursor-pointer"
+                  >
+                    <ListPlus className="h-4 w-4 mr-2" />
+                    Thêm vào playlist
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleShareVideo}
+                    className="cursor-pointer"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Chia sẻ
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </div>
+
+        <Separator />
+
+        {/* Video Description */}
+        <Card>
+          <CardContent className="pt-4 pb-2 px-2 sm:px-6">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <span>{formatDate(video.publishAt)}</span>
+                <span>•</span>
+                <span>{likesCount} like{likesCount !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="relative">
+                <p className={`text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${!isDescriptionExpanded && video.description.length > 120 ? 'line-clamp-2 sm:line-clamp-3' : ''}`}>{video.description}</p>
+                {video.description.length > 120 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  >
+                    {isDescriptionExpanded ? (
+                      <>
+                        Show less <ChevronUp className="ml-1 h-4 w-4" />
+                      </>
+                    ) : (
+                      <>
+                        Show more <ChevronDown className="ml-1 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Comments Section */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Comments ({comments?.comments?.length || 0})
+          </h2>
+
+          {/* Comment Input Box */}
+          {isAuthenticated ? (
+            <div className="flex flex-col xs:flex-row gap-2 items-start mb-2">
+              <Avatar className="h-10 w-10 mt-1 mx-auto xs:mx-0">
+                <AvatarImage src={user?.avatarUrl || `https://d1bapesvzv4qyl.cloudfront.net/avatars/${user?.id}.jpg`} />
+                <AvatarFallback>{(user?.displayName || user?.id || '').slice(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 w-full">
+                <Textarea
+                  placeholder="Add a comment..."
+                  value={commentContent}
+                  onChange={e => setCommentContent(e.target.value)}
+                  minLength={1}
+                  maxLength={500}
+                  className="mb-2 w-full"
+                  rows={2}
+                  disabled={createCommentMutation.isPending}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (commentContent.trim().length === 0) return;
+                      createCommentMutation.mutate({ content: commentContent }, {
+                        onSuccess: () => setCommentContent('')
+                      });
+                    }}
+                    disabled={commentContent.trim().length === 0 || createCommentMutation.isPending}
+                  >
+                    {createCommentMutation.isPending ? 'Posting...' : 'Comment'}
+                  </Button>
+                </div>
+                {createCommentMutation.isError && (
+                  <div className="text-red-500 text-sm mt-1">Failed to post comment. Please try again.</div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="mb-2">
+              <GoogleLoginButton />
+            </div>
+          )}
+
+          {isLoadingComments ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="flex gap-4">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : comments?.comments && comments.comments.length > 0 ? (
+            <ScrollArea className="h-[400px] rounded-md border border-gray-200 dark:border-gray-800">
+              <div className="p-4 space-y-4">
+                {comments.comments.map((comment: IComment) => {
+                  const userInfo = comments.users.find(u => u.id === comment.userId);
+                  return (
+                    <div key={comment.id} className="flex gap-4">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={userInfo?.avatar || `https://d1bapesvzv4qyl.cloudfront.net/avatars/${userInfo?.id || comment.userId}.jpg`} />
+                        <AvatarFallback>{(userInfo?.name || userInfo?.id || comment.userId).slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-gray-900 dark:text-gray-100">{userInfo?.name || userInfo?.id || comment.userId}</p>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            {formatDate(comment.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              No comments yet. Be the first to comment!
+            </div>
+          )}
+        </div>
+
+        {/* Share Modal */}
+        <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+          <DialogContent className="w-full max-w-full sm:max-w-sm p-2 sm:p-6">
+            <DialogHeader>
+              <DialogTitle>Chia sẻ video</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Copy Link */}
+              <div className="flex flex-col gap-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-muted/30">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Link video</p>
+                <div className="flex items-center gap-2 overflow-x-auto">
+                  <span className="text-sm text-gray-900 dark:text-gray-100 break-all select-all flex-1 min-w-0">
+                    {`${window.location.origin}/watch/${videoId}`}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyLink}
+                    className="flex-shrink-0 flex items-center gap-2"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Sao chép
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Playlist Selection Modal */}
+        <Dialog open={isPlaylistModalOpen} onOpenChange={setIsPlaylistModalOpen}>
+          <DialogContent className="w-full max-w-full sm:max-w-sm p-2 sm:p-6">
+            <DialogHeader>
+              <DialogTitle>Chọn playlist</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {isLoadingPlaylists ? (
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                      <Skeleton className="h-12 w-12 rounded" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : playlistsData?.playlists && playlistsData.playlists.length > 0 ? (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {playlistsData.playlists.map((playlist) => (
+                    <button
+                      key={playlist.id}
+                      onClick={() => handleAddToPlaylist(playlist.id)}
+                      disabled={editVideoPlaylistMutation.isPending}
+                      className="w-full flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+                    >
+                      <img
+                        src={playlist.thumbnailUrl || "https://cdn-icons-png.flaticon.com/512/1179/1179069.png"}
+                        alt={playlist.title}
+                        className="h-12 w-12 object-cover rounded"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                          {playlist.title}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {playlist.videos?.length || 0} video{playlist.videos?.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      {editVideoPlaylistMutation.isPending && (
+                        <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>Bạn chưa có playlist nào.</p>
+                  <p className="text-sm mt-1">Tạo playlist mới để thêm video.</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   );
 };
 
