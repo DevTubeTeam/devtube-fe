@@ -179,8 +179,8 @@ const HomePage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Home Page</h1>
+    <div className="container mx-auto px-4 py-4">
+      <h1 className="text-2xl font-bold mb-3">Home Page</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {videos?.videos.map((video: IVideoMetadata) => (

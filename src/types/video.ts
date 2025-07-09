@@ -42,6 +42,7 @@ export interface IVideoMetadata {
   createdAt: string;
   updatedAt: string;
   lifecycle: VideoLifecycle;
+  statusDetail?: string;
 }
 
 export interface IUpdateVideoMetadataRequest {

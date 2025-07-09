@@ -35,6 +35,19 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
 
     const handleWatch = async (e: React.MouseEvent) => {
         e.preventDefault();
+        // Check statusDetail first
+        if (video.statusDetail === 'VIDEO_NOT_READY') {
+            toast.error('Video đang được xử lý, vui lòng quay lại sau.');
+            return;
+        }
+        if (video.statusDetail === 'VIDEO_MISSING_URL') {
+            toast.error('Video hiện không có đường dẫn phát, vui lòng thử lại sau.');
+            return;
+        }
+        if (video.statusDetail === 'VIDEO_NOT_READY_OR_MISSING_URL') {
+            toast.error('Video chưa được xử lý xong. Vui lòng quay lại sau.');
+            return;
+        }
         setIsChecking(true);
         try {
             const res = await videoService.getVideoStatus(video.id);
@@ -68,11 +81,11 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
     };
 
     // Xác nhận xóa playlist
-  const confirmDeleteVideo = () => {
-    if (video.id) {
-      deleteVideo();
-    }
-  };
+    const confirmDeleteVideo = () => {
+        if (video.id) {
+            deleteVideo();
+        }
+    };
 
     // Mở dialog thêm vào playlist
     const handleOpenPlaylistDialog = () => {
@@ -366,24 +379,24 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
             </Dialog>
 
             {/* Dialog xác nhận xóa */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Xóa playlist</DialogTitle>
-            <DialogDescription>
-              Bạn có chắc chắn muốn xóa video <b>{video.title}</b> không? Hành động này không thể hoàn tác.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Hủy
-            </Button>
-            <Button variant="destructive" onClick={confirmDeleteVideo} disabled={isDeleting}>
-              Xóa
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>{/* Dialog xóa video */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Xóa playlist</DialogTitle>
+                        <DialogDescription>
+                            Bạn có chắc chắn muốn xóa video <b>{video.title}</b> không? Hành động này không thể hoàn tác.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                            Hủy
+                        </Button>
+                        <Button variant="destructive" onClick={confirmDeleteVideo} disabled={isDeleting}>
+                            Xóa
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>{/* Dialog xóa video */}
 
         </>
     );

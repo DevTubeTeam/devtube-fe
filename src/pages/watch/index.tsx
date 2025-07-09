@@ -322,10 +322,36 @@ const WatchPage = () => {
     return <div>Video not found</div>;
   }
 
+  // Handle special statusDetail cases
+  if (video.statusDetail === 'VIDEO_NOT_READY') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+        <div className="text-2xl font-semibold mb-2">Video đang được xử lý</div>
+        <div className="text-gray-500 dark:text-gray-400">Video của bạn đang được xử lý, vui lòng quay lại sau.</div>
+      </div>
+    );
+  }
+  if (video.statusDetail === 'VIDEO_MISSING_URL') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+        <div className="text-2xl font-semibold mb-2">Không tìm thấy đường dẫn video</div>
+        <div className="text-gray-500 dark:text-gray-400">Video hiện không có đường dẫn phát, vui lòng thử lại sau.</div>
+      </div>
+    );
+  }
+  if (video.statusDetail === 'VIDEO_NOT_READY_OR_MISSING_URL') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+        <div className="text-2xl font-semibold mb-2">Video chưa sẵn sàng hoặc thiếu đường dẫn</div>
+        <div className="text-gray-500 dark:text-gray-400">Video chưa sẵn sàng hoặc thiếu đường dẫn phát, vui lòng quay lại sau.</div>
+      </div>
+    );
+  }
+
   console.log(video.avatarUrl, video.displayName)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2 sm:px-0">
       {/* Video Player Section */}
       <div className="bg-black rounded-lg overflow-hidden">
         <HLSVideoPlayer
@@ -336,12 +362,11 @@ const WatchPage = () => {
       </div>
 
       {/* Video Info Section */}
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{video.title}</h1>
-
-        {/* Video Stats and Actions */}
+      <div className="space-y-3">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 break-words leading-tight mb-2">{video.title}</h1>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+          {/* Channel Info + Subscribe */}
+          <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 w-full sm:w-auto">
             <div className="flex items-center gap-2">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={video.avatarUrl} />
@@ -349,7 +374,7 @@ const WatchPage = () => {
               </Avatar>
               <div>
                 <p className="font-medium text-gray-900 dark:text-gray-100">{video.displayName}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{formatViews(subscribersCount)} subscribers</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(subscribersCount)} subscribers</p>
               </div>
             </div>
             <Button
@@ -357,19 +382,20 @@ const WatchPage = () => {
               size="sm"
               onClick={handleSubscribeToggle}
               disabled={isSubscribeLoading}
+              className="w-full xs:w-auto"
             >
               {isSubscribeLoading ? '...' : isSubscribed ? 'Subscribed' : 'Subscribe'}
             </Button>
           </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mr-2">
+          {/* Actions */}
+          <div className="flex flex-nowrap overflow-x-auto gap-2 py-1 w-full sm:w-auto">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mr-2 min-w-max">
               {formatViews(video.views)} views
             </div>
             <Button
               variant={isLiked ? "default" : "outline"}
               size="sm"
-              className={`gap-2 ${isLiked ? 'bg-gray-900 hover:bg-gray-800 text-white border-gray-900 dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900 dark:border-gray-100' : ''}`}
+              className={`gap-2 min-w-max ${isLiked ? 'bg-gray-900 hover:bg-gray-800 text-white border-gray-900 dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900 dark:border-gray-100' : ''}`}
               onClick={handleLikeToggle}
               disabled={isLikeLoading}
             >
@@ -378,7 +404,7 @@ const WatchPage = () => {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="min-w-max">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -423,23 +449,20 @@ const WatchPage = () => {
 
       {/* Video Description */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-4 pb-2 px-2 sm:px-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               <span>{formatDate(video.publishAt)}</span>
               <span>•</span>
               <span>{likesCount} like{likesCount !== 1 ? 's' : ''}</span>
             </div>
             <div className="relative">
-              <p className={`text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${!isDescriptionExpanded && video.description.length > 200 ? 'line-clamp-3' : ''
-                }`}>
-                {video.description}
-              </p>
-              {video.description.length > 200 && (
+              <p className={`text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${!isDescriptionExpanded && video.description.length > 120 ? 'line-clamp-2 sm:line-clamp-3' : ''}`}>{video.description}</p>
+              {video.description.length > 120 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mt-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                  className="mt-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                   onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                 >
                   {isDescriptionExpanded ? (
@@ -466,19 +489,19 @@ const WatchPage = () => {
 
         {/* Comment Input Box */}
         {isAuthenticated ? (
-          <div className="flex gap-3 items-start mb-2">
-            <Avatar className="h-10 w-10 mt-1">
+          <div className="flex flex-col xs:flex-row gap-2 items-start mb-2">
+            <Avatar className="h-10 w-10 mt-1 mx-auto xs:mx-0">
               <AvatarImage src={user?.avatarUrl || `https://d1bapesvzv4qyl.cloudfront.net/avatars/${user?.id}.jpg`} />
               <AvatarFallback>{(user?.displayName || user?.id || '').slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <Textarea
                 placeholder="Add a comment..."
                 value={commentContent}
                 onChange={e => setCommentContent(e.target.value)}
                 minLength={1}
                 maxLength={500}
-                className="mb-2"
+                className="mb-2 w-full"
                 rows={2}
                 disabled={createCommentMutation.isPending}
               />
@@ -553,7 +576,7 @@ const WatchPage = () => {
 
       {/* Share Modal */}
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-        <DialogContent className="w-full max-w-sm p-4 sm:p-6">
+        <DialogContent className="w-full max-w-full sm:max-w-sm p-2 sm:p-6">
           <DialogHeader>
             <DialogTitle>Chia sẻ video</DialogTitle>
           </DialogHeader>
@@ -582,7 +605,7 @@ const WatchPage = () => {
 
       {/* Playlist Selection Modal */}
       <Dialog open={isPlaylistModalOpen} onOpenChange={setIsPlaylistModalOpen}>
-        <DialogContent className="w-full max-w-sm p-4 sm:p-6">
+        <DialogContent className="w-full max-w-full sm:max-w-sm p-2 sm:p-6">
           <DialogHeader>
             <DialogTitle>Chọn playlist</DialogTitle>
           </DialogHeader>

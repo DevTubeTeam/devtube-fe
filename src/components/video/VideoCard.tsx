@@ -32,6 +32,14 @@ const VideoCard = ({ video, showEditDelete = false, showAddToPlaylist = false }:
     }
 
     // VideoCard cơ bản cho các trang public
+    if (
+        video.statusDetail === 'VIDEO_NOT_READY' ||
+        video.statusDetail === 'VIDEO_MISSING_URL' ||
+        video.statusDetail === 'VIDEO_NOT_READY_OR_MISSING_URL'
+    ) {
+        return null;
+    }
+
     return (
         <Card className="flex flex-col h-full rounded-xl overflow-hidden group shadow-sm hover:shadow-lg transition-all duration-300">
             <div className="relative w-full aspect-[16/9] bg-gray-100">

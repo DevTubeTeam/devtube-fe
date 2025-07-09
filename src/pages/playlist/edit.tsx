@@ -5,12 +5,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useVideo } from "@/hooks/useVideo";
 import type { IVideoMetadata } from "@/types/video";
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { ArrowLeft, GripVertical, Trash2 } from "lucide-react";
+import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { ArrowLeft, GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ROUTES } from "../../constants/routes";
 import { SortableTableRow } from "../../components/playlists/SortableTableRow";
+import { ROUTES } from "../../constants/routes";
 
 export default function PlaylistEditPage() {
     const { id } = useParams();
@@ -27,7 +27,13 @@ export default function PlaylistEditPage() {
     const [videos, setVideos] = useState<IVideoMetadata[]>([]);
     useEffect(() => {
         if (playlistData?.playlist?.videos) {
-            setVideos(playlistData.playlist.videos);
+            setVideos(
+                playlistData.playlist.videos.filter(
+                    v => v.statusDetail !== 'VIDEO_NOT_READY' &&
+                        v.statusDetail !== 'VIDEO_MISSING_URL' &&
+                        v.statusDetail !== 'VIDEO_NOT_READY_OR_MISSING_URL'
+                )
+            );
         }
     }, [playlistData?.playlist?.videos]);
 
