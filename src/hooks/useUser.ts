@@ -143,6 +143,20 @@ export function useUser() {
         });
     }
 
+    /**
+     * Hook để lấy danh sách channels
+     * @param page - Số trang (mặc định: 1)
+     * @param limit - Số lượng kết quả mỗi trang (mặc định: 10)
+     * @param keyword - Từ khóa tìm kiếm
+     * @param sortBy - Trường sắp xếp (mặc định: created_at)
+     * @param sortOrder - Thứ tự sắp xếp (mặc định: desc)
+     */
+    function useGetChannels(page: number = 1, limit: number = 10, keyword: string = '') {
+        return useQuery({
+            queryKey: ['channels', page, limit, keyword],
+            queryFn: () => authService.getChannels(page, limit, keyword)
+        });
+    }
     return {
         useGetChannelById,
         useSearchChannels,
@@ -153,6 +167,7 @@ export function useUser() {
         useGetSubscribedChannels,
         useUpdateUserProfile,
         useGetUserProfile,
-        useCreateAvatarPresignedUrl
+        useCreateAvatarPresignedUrl,
+        useGetChannels
     }
 }

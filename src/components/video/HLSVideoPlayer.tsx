@@ -36,7 +36,6 @@ function HLSVideoPlayer({ source, poster, className }: HLSVideoPlayerProps) {
 
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     // Log available levels for debugging
-                    console.log('Available levels:', hls?.levels);
 
                     const levels = hls?.levels.map((level, i) => ({
                         label: `${level.height}p`,
@@ -122,7 +121,7 @@ function HLSVideoPlayer({ source, poster, className }: HLSVideoPlayerProps) {
                 crossOrigin="anonymous"
                 playsInline
                 poster={poster}
-                className="w-full h-full rounded-lg shadow-lg object-contain bg-black"
+                className="w-full h-full rounded-lg shadow-lg object-cover bg-black"
             >
                 <p>
                     Your browser doesn't support HLS playback. Please use a compatible browser or download the

@@ -8,71 +8,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import VideoCard from '@/components/video/VideoCard';
 import { useVideo } from '@/hooks/useVideo';
 import { IVideoMetadata } from '@/types/video';
 import { useState } from 'react';
-
-const FilterBar = ({
-  selectedType,
-  setSelectedType,
-  selectedTimeRange,
-  setSelectedTimeRange,
-  selectedSortBy,
-  setSelectedSortBy,
-}: {
-  selectedType: 'popular' | 'recommended';
-  setSelectedType: (type: 'popular' | 'recommended') => void;
-  selectedTimeRange: 'day' | 'week' | 'month' | 'year' | 'all';
-  setSelectedTimeRange: (range: 'day' | 'week' | 'month' | 'year' | 'all') => void;
-  selectedSortBy: 'relevance' | 'date' | 'views';
-  setSelectedSortBy: (sort: 'relevance' | 'date' | 'views') => void;
-}) => {
-  return (
-    <div className="flex flex-wrap gap-2">
-      <Select value={selectedType} onValueChange={(value: 'popular' | 'recommended') => setSelectedType(value)}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="popular">Popular</SelectItem>
-          <SelectItem value="recommended">Recommended</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Select value={selectedTimeRange} onValueChange={(value: 'day' | 'week' | 'month' | 'year' | 'all') => setSelectedTimeRange(value)}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Time range" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="day">Today</SelectItem>
-          <SelectItem value="week">This Week</SelectItem>
-          <SelectItem value="month">This Month</SelectItem>
-          <SelectItem value="year">This Year</SelectItem>
-          <SelectItem value="all">All Time</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Select value={selectedSortBy} onValueChange={(value: 'relevance' | 'date' | 'views') => setSelectedSortBy(value)}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Sort by" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="relevance">Relevance</SelectItem>
-          <SelectItem value="date">Date</SelectItem>
-          <SelectItem value="views">Views</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-  );
-};
 
 const HomePage = () => {
   const [page, setPage] = useState(1);
@@ -182,13 +121,11 @@ const HomePage = () => {
   return (
     <>
       <PageMeta
-        title="DevTube - Discover Amazing Videos"
+        title="Trang chủ - DevTube"
         description="Explore trending and popular videos on DevTube. Watch, share, and discover amazing content from creators around the world."
       />
-      <div className="container mx-auto px-4 py-4">
-        <h1 className="text-2xl font-bold mb-3">Home Page</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="container mx-auto px-2 sm:px-4 py-2 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
           {videos?.videos.map((video: IVideoMetadata) => (
             <VideoCard key={video.id} video={video} />
           ))}

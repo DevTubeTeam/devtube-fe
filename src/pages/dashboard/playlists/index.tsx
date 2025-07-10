@@ -79,8 +79,8 @@ const DashboardPlaylistPage = () => {
   return (
     <>
       <PageMeta
-        title="Manage Playlists - DevTube"
-        description="Create, edit, and manage your channel playlists. Organize your videos into custom collections."
+        title="Quản lý danh sách phát - DevTube"
+        description="Tạo, chỉnh sửa và quản lý danh sách phát của kênh. Sắp xếp video vào các bộ sưu tập tùy chỉnh."
       />
       <div className="container mx-auto py-8">
         <div className="flex items-center justify-between mb-6">

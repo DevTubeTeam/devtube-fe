@@ -13,16 +13,13 @@ export const storageUtil = {
 
   get<T>(key: string): T | null {
     try {
-      console.log(`Getting value for key: ${key} from cookies`);
       const match = document.cookie.match(
         new RegExp('(?:^|; )' + key.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
       );
       if (!match) {
-        console.log(`No cookie found for key: ${key}`);
         return null;
       }
       const value = JSON.parse(decodeURIComponent(match[1])) as T;
-      console.log(`Retrieved value for key: ${key}`, value);
       return value;
     } catch (error) {
       console.error(`Error getting ${key} from cookies`, error);

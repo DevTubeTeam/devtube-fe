@@ -35,6 +35,7 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
 
     const handleWatch = async (e: React.MouseEvent) => {
         e.preventDefault();
+
         // Check statusDetail first
         if (video.statusDetail === 'VIDEO_NOT_READY') {
             toast.error('Video đang được xử lý, vui lòng quay lại sau.');
@@ -46,6 +47,10 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
         }
         if (video.statusDetail === 'VIDEO_NOT_READY_OR_MISSING_URL') {
             toast.error('Video chưa được xử lý xong. Vui lòng quay lại sau.');
+            return;
+        }
+        if (video.statusDetail === 'VIDEO_NOT_PUBLISHED') {
+            toast.error('Video chưa được xuất bản, hãy xuất bản video trước khi xem.');
             return;
         }
         setIsChecking(true);
@@ -224,7 +229,7 @@ const DashboardVideoCard = ({ video }: DashboardVideoCardProps) => {
                                 ${video.privacy === VidPrivacy.UNLISTED ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : ''}
                             `}
                         >
-                            {video.privacy === VidPrivacy.PUBLIC ? 'public' : video.privacy === VidPrivacy.PRIVATE ? 'private' : 'unlisted'}
+                            {video.privacy === VidPrivacy.PUBLIC ? 'Công khai' : video.privacy === VidPrivacy.PRIVATE ? 'Riêng tư' : 'Không công khai'}
                         </span>
                     </div>
                     <DropdownMenu>

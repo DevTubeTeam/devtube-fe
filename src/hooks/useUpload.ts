@@ -111,8 +111,7 @@ export function useUpload(options: UploadOptions = {}) {
           file.status = 'error';
           file.progress = 0;
           file.error = error instanceof Error ? error.message : 'Upload failed';
-          console.log(error);
-          console.log(file);
+          console.error(error);
           throw error;
         }
       },

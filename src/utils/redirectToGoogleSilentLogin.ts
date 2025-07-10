@@ -1,5 +1,4 @@
 const redirectToGoogleSilentLogin = () => {
-  console.log('Redirecting to Google OAuth for silent login...');
   if (!import.meta.env.VITE_GOOGLE_REDIRECT_URI || !import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     console.error('Environment variables for Google OAuth are not set.');
     return;

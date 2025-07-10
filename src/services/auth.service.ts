@@ -4,6 +4,7 @@ import {
   IAvatarPresignedUrlRequest,
   IAvatarPresignedUrlResponse,
   IChannel,
+  IGetChannelsResponse,
   IGetChannelSubscribersCountResponse,
   IGetSubscribedChannelsResponse,
   IGetUserProfileResponse,
@@ -78,6 +79,15 @@ const authService = {
       return response.data;
     } catch (error) {
       throw new Error('Failed to get authenticated user');
+    }
+  },
+
+  getChannels: async (page: number = 1, limit: number = 10, keyword: string = ''): Promise<HttpResponse<IGetChannelsResponse>> => {
+    try {
+      const response = await api.get(API_ENDPOINTS.AUTH.GET_CHANNELS, { withCredentials: true, params: { page, limit, keyword } });
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to get channels');
     }
   },
 

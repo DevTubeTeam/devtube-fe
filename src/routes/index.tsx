@@ -1,6 +1,6 @@
 import { ProtectedRoute } from '@/components/auth';
 import { ROUTES } from '@/constants/routes';
-import { AdminLayout, DashboardLayout, HomeFeedLayout, PublicLayout, WatchLayout } from '@/layouts';
+import { DashboardLayout, HomeFeedLayout, PublicLayout, WatchLayout } from '@/layouts';
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 
@@ -18,7 +18,6 @@ const EditVideo = lazy(() => import('@/pages/dashboard/videos/edit'));
 const DashboardPlaylists = lazy(() => import('@/pages/dashboard/playlists'));
 const Playlists = lazy(() => import('@/pages/playlist'));
 const PlaylistEdit = lazy(() => import('@/pages/playlist/edit'));
-const UserSettings = lazy(() => import('@/pages/dashboard/settings'));
 const UserProfile = lazy(() => import('@/pages/dashboard/profile'));
 const DashboardPlaylistsEditPage = lazy(() => import('@/pages/dashboard/playlists/edit'));
 const ChannelListPage = lazy(() => import('@/pages/channels'));
@@ -26,10 +25,7 @@ const SavedPage = lazy(() => import('@/pages/saved'));
 const WatchLaterPage = lazy(() => import('@/pages/watch-later'));
 const LikedPage = lazy(() => import('@/pages/liked'));
 
-const AdminUsers = lazy(() => import('@/pages/admin/users'));
-const AdminVideos = lazy(() => import('@/pages/admin/videos'));
-const AdminReports = lazy(() => import('@/pages/admin/reports'));
-const AdminSettings = lazy(() => import('@/pages/admin/settings'));
+
 
 export const appRoutes: RouteObject[] = [
   // Public routes
@@ -42,7 +38,13 @@ export const appRoutes: RouteObject[] = [
         element: <HomeFeedLayout />,
         children: [
           { path: '', element: <Home /> },
-          { path: ROUTES.EXPLORE.slice(1), element: <Explore /> },
+          {
+            path: ROUTES.EXPLORE.slice(1), element: (
+              <ProtectedRoute role='user'>
+                <Explore />
+              </ProtectedRoute>
+            )
+          },
           { path: ROUTES.SEARCH.slice(1), element: <Search /> },
           {
             path: ROUTES.CHANNEL().slice(1),
@@ -115,9 +117,6 @@ export const appRoutes: RouteObject[] = [
           },
         ],
       },
-
-
-
     ],
   },
   // Authenticated routes
@@ -135,24 +134,7 @@ export const appRoutes: RouteObject[] = [
       { path: 'videos/edit/:id', element: <EditVideo /> },
       { path: 'playlists', element: <DashboardPlaylists /> },
       { path: 'playlists/edit/:id', element: <DashboardPlaylistsEditPage /> },
-      { path: 'settings', element: <UserSettings /> },
       { path: 'profile', element: <UserProfile /> },
-    ],
-  },
-  // Admin routes
-  {
-    path: ROUTES.ADMIN,
-    element: (
-      <ProtectedRoute role='admin'>
-        <AdminLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { path: '', element: <AdminUsers /> },
-      { path: 'users', element: <AdminUsers /> },
-      { path: 'videos', element: <AdminVideos /> },
-      { path: 'reports', element: <AdminReports /> },
-      { path: 'settings', element: <AdminSettings /> },
     ],
   },
   // Auth route

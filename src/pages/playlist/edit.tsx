@@ -32,7 +32,8 @@ export default function PlaylistEditPage() {
                 playlistData.playlist.videos.filter(
                     v => v.statusDetail !== 'VIDEO_NOT_READY' &&
                         v.statusDetail !== 'VIDEO_MISSING_URL' &&
-                        v.statusDetail !== 'VIDEO_NOT_READY_OR_MISSING_URL'
+                        v.statusDetail !== 'VIDEO_NOT_READY_OR_MISSING_URL' &&
+                        v.statusDetail !== 'VIDEO_NOT_PUBLISHED'
                 )
             );
         }
@@ -91,7 +92,7 @@ export default function PlaylistEditPage() {
     return (
         <>
             <PageMeta
-                title={playlistData?.playlist ? `Edit ${playlistData.playlist.title} - DevTube` : "Edit Playlist - DevTube"}
+                title={playlistData?.playlist ? `Chỉnh sửa ${playlistData.playlist.title} - DevTube` : "Chỉnh sửa Playlist - DevTube"}
                 description="Edit playlist details and manage video order. Add, remove, and reorder videos in your playlist."
             />
             <div className="w-full px-6 py-8">

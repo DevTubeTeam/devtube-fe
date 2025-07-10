@@ -239,8 +239,8 @@ const DashboardPlaylistsEditPage = () => {
     return (
         <>
             <PageMeta
-                title={playlistData?.playlist ? `Edit ${playlistData.playlist.title} - DevTube` : "Edit Playlist - DevTube"}
-                description="Edit playlist details and manage video order. Add, remove, and reorder videos in your playlist."
+                title={playlistData?.playlist ? `Chỉnh sửa ${playlistData.playlist.title} - DevTube` : "Chỉnh sửa Playlist - DevTube"}
+                description="Chỉnh sửa thông tin danh sách phát và quản lý thứ tự video. Thêm, xóa và sắp xếp lại video trong danh sách phát của bạn."
             />
             <div className="w-full max-w-6xl mx-auto py-10 px-2 md:px-0">
                 <div className="flex items-center gap-3 mb-8">

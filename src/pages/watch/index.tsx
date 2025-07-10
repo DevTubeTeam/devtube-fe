@@ -14,49 +14,11 @@ import { useAuth } from '@/contexts';
 import { useUser } from '@/hooks/useUser';
 import { useVideo } from '@/hooks/useVideo';
 import { IComment } from '@/types/video';
-import { formatViews } from '@/utils/format-video-info.util';
+import { formatDate, formatViews } from '@/utils/format-video-info.util';
 import { ChevronDown, ChevronUp, Clock, Copy, ListPlus, MoreHorizontal, Save, Share2, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) {
-    return 'just now';
-  }
-
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) {
-    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-  }
-
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-  }
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) {
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-  }
-
-  const diffInWeeks = Math.floor(diffInDays / 7);
-  if (diffInWeeks < 4) {
-    return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
-  }
-
-  const diffInMonths = Math.floor(diffInDays / 30);
-  if (diffInMonths < 12) {
-    return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
-  }
-
-  const diffInYears = Math.floor(diffInDays / 365);
-  return `${diffInYears} year${diffInYears > 1 ? 's' : ''} ago`;
-};
 
 const WatchPage = () => {
   const { videoId } = useParams<{ videoId: string }>();
@@ -89,8 +51,6 @@ const WatchPage = () => {
   const createCommentMutation = useCreateComment(videoId || '');
   const { data: video, isLoading: isLoadingVideo } = useVideoById(videoId || '');
   const { data: comments, isLoading: isLoadingComments } = useGetComments(videoId || '');
-
-  console.log(video)
 
   // Like video hooks
   const likeVideoMutation = useLikeVideo();
@@ -135,16 +95,6 @@ const WatchPage = () => {
   const isInWatchLater = isInWatchLaterData?.isInWatchLater || false;
   const isSaveLoading = saveVideoMutation.isPending || unsaveVideoMutation.isPending;
   const isWatchLaterLoading = addToWatchLaterMutation.isPending || removeFromWatchLaterMutation.isPending;
-
-  // Debug logs
-  console.log('Subscribe Debug:', {
-    videoUserId: video?.userId,
-    isSubscribedData,
-    isSubscribed,
-    subscribersCountData,
-    subscribersCount,
-    isSubscribeLoading
-  });
 
   const handleLikeToggle = async () => {
     if (!isAuthenticated) {
@@ -348,39 +298,76 @@ const WatchPage = () => {
       </div>
     );
   }
+  if (video.statusDetail === 'VIDEO_NOT_PUBLISHED') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+        <div className="text-2xl font-semibold mb-2">Video chưa được xuất bản</div>
+        <div className="text-gray-500 dark:text-gray-400">Video chưa được xuất bản, vui lòng quay lại sau.</div>
+      </div>
+    );
+  }
 
-  console.log(video.avatarUrl, video.displayName)
+  // Helper for fallback text
+  const renderOrFallback = (value: any, fallback: string) => {
+    if (value === null || value === undefined || value === '') {
+      return <span className="italic text-gray-400">{fallback}</span>;
+    }
+    return value;
+  };
 
   return (
     <>
       <PageMeta
-        title={video ? `${video.title} - DevTube` : "Video - DevTube"}
-        description={video ? `${video.description.substring(0, 160)}...` : "Watch amazing videos on DevTube"}
+        title={video ? `${renderOrFallback(video.title, 'Không có tiêu đề')} - DevTube` : "Video - DevTube"}
+        description={video ? `${video.description?.substring(0, 160) || 'Không có mô tả'}...` : "Watch amazing videos on DevTube"}
       />
       <div className="space-y-6 px-2 sm:px-0">
         {/* Video Player Section */}
         <div className="bg-black rounded-lg overflow-hidden">
-          <HLSVideoPlayer
-            source={video.videoUrl}
-            poster={video.thumbnailUrl}
-            className="w-full aspect-video"
-          />
+          {video.videoUrl
+            ? (
+              <HLSVideoPlayer
+                source={video.videoUrl}
+                poster={video.thumbnailUrl}
+                className="w-full aspect-video"
+              />
+            )
+            : (
+              <div className="flex items-center justify-center aspect-video text-gray-400 text-lg">
+                Không có đường dẫn video để phát
+              </div>
+            )
+          }
         </div>
 
         {/* Video Info Section */}
         <div className="space-y-3">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 break-words leading-tight mb-2">{video.title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 break-words leading-tight mb-2">
+            {renderOrFallback(video.title, 'Không có tiêu đề')}
+          </h1>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {/* Channel Info + Subscribe */}
             <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 w-full sm:w-auto">
               <div className="flex items-center gap-2">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={video.avatarUrl} />
-                  <AvatarFallback>{video.displayName}</AvatarFallback>
+                  <AvatarImage src={video.avatarUrl || undefined} />
+                  <AvatarFallback>
+                    {renderOrFallback(
+                      (video.displayName || video.userId || '').slice(0, 2).toUpperCase(),
+                      'NA'
+                    )}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{video.displayName}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(subscribersCount)} subscribers</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                    {renderOrFallback(video.displayName, 'Không có tên kênh')}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {typeof subscribersCount === 'number'
+                      ? `${formatViews(subscribersCount)} subscribers`
+                      : <span className="italic text-gray-400">Không có dữ liệu người đăng ký</span>
+                    }
+                  </p>
                 </div>
               </div>
               <Button
@@ -396,7 +383,10 @@ const WatchPage = () => {
             {/* Actions */}
             <div className="flex flex-nowrap overflow-x-auto gap-2 py-1 w-full sm:w-auto">
               <div className="text-sm text-gray-500 dark:text-gray-400 mr-2 min-w-max">
-                {formatViews(video.views)} views
+                {typeof video.views === 'number'
+                  ? `${formatViews(video.views)} views`
+                  : <span className="italic text-gray-400">Không có dữ liệu lượt xem</span>
+                }
               </div>
               <Button
                 variant={isLiked ? "default" : "outline"}
@@ -406,7 +396,10 @@ const WatchPage = () => {
                 disabled={isLikeLoading}
               >
                 <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-                {isLikeLoading ? '...' : `${likesCount} Like${likesCount !== 1 ? 's' : ''}`}
+                {isLikeLoading
+                  ? '...'
+                  : `${typeof likesCount === 'number' ? likesCount : 0} Like${likesCount !== 1 ? 's' : ''}`
+                }
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -458,13 +451,25 @@ const WatchPage = () => {
           <CardContent className="pt-4 pb-2 px-2 sm:px-6">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                <span>{formatDate(video.publishAt)}</span>
+                <span>
+                  {video.publishAt
+                    ? formatDate(video.publishAt)
+                    : <span className="italic text-gray-400">Không có ngày đăng</span>
+                  }
+                </span>
                 <span>•</span>
-                <span>{likesCount} like{likesCount !== 1 ? 's' : ''}</span>
+                <span>
+                  {typeof likesCount === 'number'
+                    ? `${likesCount} like${likesCount !== 1 ? 's' : ''}`
+                    : <span className="italic text-gray-400">Không có dữ liệu lượt thích</span>
+                  }
+                </span>
               </div>
               <div className="relative">
-                <p className={`text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${!isDescriptionExpanded && video.description.length > 120 ? 'line-clamp-2 sm:line-clamp-3' : ''}`}>{video.description}</p>
-                {video.description.length > 120 && (
+                <p className={`text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${!isDescriptionExpanded && video.description?.length > 120 ? 'line-clamp-2 sm:line-clamp-3' : ''}`}>
+                  {renderOrFallback(video.description, 'Không có mô tả')}
+                </p>
+                {video.description && video.description.length > 120 && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -490,16 +495,15 @@ const WatchPage = () => {
         {/* Comments Section */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Comments ({comments?.comments?.length || 0})
+            {typeof comments?.comments?.length === 'number'
+              ? `Comments (${comments.comments.length})`
+              : 'Comments (Không có dữ liệu)'
+            }
           </h2>
 
           {/* Comment Input Box */}
           {isAuthenticated ? (
             <div className="flex flex-col xs:flex-row gap-2 items-start mb-2">
-              <Avatar className="h-10 w-10 mt-1 mx-auto xs:mx-0">
-                <AvatarImage src={user?.avatarUrl || `https://d1bapesvzv4qyl.cloudfront.net/avatars/${user?.id}.jpg`} />
-                <AvatarFallback>{(user?.displayName || user?.id || '').slice(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
               <div className="flex-1 w-full">
                 <Textarea
                   placeholder="Add a comment..."
@@ -552,21 +556,37 @@ const WatchPage = () => {
             <ScrollArea className="h-[400px] rounded-md border border-gray-200 dark:border-gray-800">
               <div className="p-4 space-y-4">
                 {comments.comments.map((comment: IComment) => {
-                  const userInfo = comments.users.find(u => u.id === comment.userId);
+                  const userInfo = comments.users?.find(u => u.id === comment.userId);
                   return (
                     <div key={comment.id} className="flex gap-4">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={userInfo?.avatar || `https://d1bapesvzv4qyl.cloudfront.net/avatars/${userInfo?.id || comment.userId}.jpg`} />
-                        <AvatarFallback>{(userInfo?.name || userInfo?.id || comment.userId).slice(0, 2).toUpperCase()}</AvatarFallback>
+                        <AvatarImage src={
+                          userInfo?.avatar
+                            ? userInfo.avatar
+                            : `https://d1bapesvzv4qyl.cloudfront.net/avatars/${userInfo?.id || comment.userId}.jpg`
+                        } />
+                        <AvatarFallback>
+                          {renderOrFallback(
+                            (userInfo?.name || userInfo?.id || comment.userId || '').slice(0, 2).toUpperCase(),
+                            'NA'
+                          )}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-gray-900 dark:text-gray-100">{userInfo?.name || userInfo?.id || comment.userId}</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
+                            {renderOrFallback(userInfo?.name || userInfo?.id || comment.userId, 'Ẩn danh')}
+                          </p>
                           <span className="text-sm text-gray-500 dark:text-gray-400">
-                            {formatDate(comment.createdAt)}
+                            {comment.createdAt
+                              ? formatDate(comment.createdAt)
+                              : <span className="italic text-gray-400">Không có ngày</span>
+                            }
                           </span>
                         </div>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          {renderOrFallback(comment.content, 'Không có nội dung')}
+                        </p>
                       </div>
                     </div>
                   );
@@ -575,7 +595,10 @@ const WatchPage = () => {
             </ScrollArea>
           ) : (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              No comments yet. Be the first to comment!
+              {comments && comments.comments && comments.comments.length === 0
+                ? 'No comments yet. Be the first to comment!'
+                : 'Không có dữ liệu bình luận'
+              }
             </div>
           )}
         </div>
@@ -592,7 +615,10 @@ const WatchPage = () => {
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Link video</p>
                 <div className="flex items-center gap-2 overflow-x-auto">
                   <span className="text-sm text-gray-900 dark:text-gray-100 break-all select-all flex-1 min-w-0">
-                    {`${window.location.origin}/watch/${videoId}`}
+                    {videoId
+                      ? `${window.location.origin}/watch/${videoId}`
+                      : <span className="italic text-gray-400">Không có link video</span>
+                    }
                   </span>
                   <Button
                     size="sm"
@@ -639,15 +665,18 @@ const WatchPage = () => {
                     >
                       <img
                         src={playlist.thumbnailUrl || "https://cdn-icons-png.flaticon.com/512/1179/1179069.png"}
-                        alt={playlist.title}
+                        alt={playlist.title || 'Không có tiêu đề'}
                         className="h-12 w-12 object-cover rounded"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                          {playlist.title}
+                          {renderOrFallback(playlist.title, 'Không có tiêu đề')}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {playlist.videos?.length || 0} video{playlist.videos?.length !== 1 ? 's' : ''}
+                          {typeof playlist.videos?.length === 'number'
+                            ? `${playlist.videos.length} video${playlist.videos.length !== 1 ? 's' : ''}`
+                            : 'Không có dữ liệu video'
+                          }
                         </p>
                       </div>
                       {editVideoPlaylistMutation.isPending && (
@@ -658,8 +687,15 @@ const WatchPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <p>Bạn chưa có playlist nào.</p>
-                  <p className="text-sm mt-1">Tạo playlist mới để thêm video.</p>
+                  {playlistsData && playlistsData.playlists && playlistsData.playlists.length === 0
+                    ? (
+                      <>
+                        <p>Bạn chưa có playlist nào.</p>
+                        <p className="text-sm mt-1">Tạo playlist mới để thêm video.</p>
+                      </>
+                    )
+                    : <p>Không có dữ liệu playlist</p>
+                  }
                 </div>
               )}
             </div>

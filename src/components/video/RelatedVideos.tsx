@@ -1,3 +1,4 @@
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useVideo } from '@/hooks/useVideo';
 import { IVideoMetadata } from '@/types/video';
@@ -66,37 +67,39 @@ export const RelatedVideos = ({ videoId }: RelatedVideosProps) => {
                     ))}
                 </div>
             ) : relatedVideosResponse?.videos && relatedVideosResponse.videos.length > 0 ? (
-                <div className="space-y-4">
-                    {relatedVideosResponse.videos.map((relatedVideo: IVideoMetadata) => (
-                        <Link
-                            key={relatedVideo.id}
-                            to={`/video/${relatedVideo.id}`}
-                            className="flex gap-4 hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors"
-                        >
-                            <div className="relative h-24 w-40 flex-shrink-0">
-                                <img
-                                    src={relatedVideo.thumbnailUrl}
-                                    alt={relatedVideo.title}
-                                    className="w-full h-full object-cover rounded-lg"
-                                />
-                                <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs px-1 rounded">
-                                    {formatViews(relatedVideo.views)} views
+                <ScrollArea className="max-h-[calc(100vh-6rem)] lg:h-[calc(100vh-6rem)] pr-1">
+                    <div className="space-y-4">
+                        {relatedVideosResponse.videos.map((relatedVideo: IVideoMetadata) => (
+                            <Link
+                                key={relatedVideo.id}
+                                to={`/video/${relatedVideo.id}`}
+                                className="flex flex-col sm:flex-row gap-2 sm:gap-4 hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors"
+                            >
+                                <div className="relative w-full h-40 sm:w-40 sm:h-24 flex-shrink-0">
+                                    <img
+                                        src={relatedVideo.thumbnailUrl}
+                                        alt={relatedVideo.title}
+                                        className="w-full h-full object-cover rounded-lg"
+                                    />
+                                    <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs px-1 rounded">
+                                        {formatViews(relatedVideo.views)} views
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h3 className="font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
-                                    {relatedVideo.title}
-                                </h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    {relatedVideo.displayName}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {formatDate(relatedVideo.publishAt)}
-                                </p>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
+                                        {relatedVideo.title}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                                        {relatedVideo.displayName}
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        {formatDate(relatedVideo.publishAt)}
+                                    </p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </ScrollArea>
             ) : (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No related videos found

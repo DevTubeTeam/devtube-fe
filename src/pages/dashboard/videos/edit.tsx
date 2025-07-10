@@ -85,8 +85,8 @@ const EditVideoPage = () => {
   return (
     <>
       <PageMeta
-        title={video ? `Edit ${video.title} - DevTube` : "Edit Video - DevTube"}
-        description="Edit video metadata, thumbnail, and settings. Update title, description, privacy, and more."
+        title={video ? `Chỉnh sửa ${video.title} - DevTube` : "Chỉnh sửa video - DevTube"}
+        description="Chỉnh sửa thông tin video, ảnh đại diện và cài đặt. Cập nhật tiêu đề, mô tả, quyền riêng tư và nhiều hơn nữa."
       />
       <div className="max-w-5xl mx-auto py-8 px-2 md:px-0">
         {/* Header */}

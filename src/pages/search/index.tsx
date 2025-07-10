@@ -12,36 +12,36 @@ const formatDate = (dateString: string) => {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return 'just now';
+    return 'vừa xong';
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+    return `${diffInMinutes} phút trước`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    return `${diffInHours} giờ trước`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) {
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    return `${diffInDays} ngày trước`;
   }
 
   const diffInWeeks = Math.floor(diffInDays / 7);
   if (diffInWeeks < 4) {
-    return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
+    return `${diffInWeeks} tuần trước`;
   }
 
   const diffInMonths = Math.floor(diffInDays / 30);
   if (diffInMonths < 12) {
-    return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
+    return `${diffInMonths} tháng trước`;
   }
 
   const diffInYears = Math.floor(diffInDays / 365);
-  return `${diffInYears} year${diffInYears > 1 ? 's' : ''} ago`;
+  return `${diffInYears} năm trước`;
 };
 
 const SearchVideoCard = ({ video }: { video: IVideoMetadata }) => {
@@ -74,7 +74,7 @@ const SearchVideoCard = ({ video }: { video: IVideoMetadata }) => {
           {video.title}
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          {formatViews(video.views)} views • {formatDate(video.publishAt)}
+          {formatViews(video.views)} lượt xem • {formatDate(video.publishAt)}
         </p>
         <div className="flex items-center gap-2 mb-2">
           <div className="w-6 h-6 rounded-full overflow-hidden">
@@ -141,8 +141,8 @@ const SearchPage = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center text-red-500">
-          <h2 className="text-xl font-semibold mb-2">Error loading videos</h2>
-          <p>Please try again later</p>
+          <h2 className="text-xl font-semibold mb-2">Lỗi tải video</h2>
+          <p>Vui lòng thử lại sau</p>
         </div>
       </div>
     );
@@ -151,32 +151,32 @@ const SearchPage = () => {
   return (
     <>
       <PageMeta
-        title={`Search results for "${query}" - DevTube`}
-        description={`Search results for "${query}" on DevTube`}
+        title={`Kết quả tìm kiếm "${query}" - DevTube`}
+        description={`Kết quả tìm kiếm cho "${query}" trên DevTube`}
       />
       <div className="container mx-auto px-4 py-8">
-        <PageBreadcrumb pageTitle="Search Results" />
+        <PageBreadcrumb pageTitle="Kết quả tìm kiếm" />
 
         <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">
-          Search Results
+          Kết quả tìm kiếm
           <span className="text-blue-600 dark:text-blue-400 ml-2">"{query}"</span>
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          Found {videos?.totalCount || 0} results
+          Tìm thấy {videos?.totalCount || 0} kết quả
         </p>
 
-        {/* Filters */}
+        {/* Bộ lọc */}
         <div className="mb-8 flex flex-wrap gap-2">
           <select
             value={selectedTimeRange}
             onChange={(e) => setSelectedTimeRange(e.target.value as any)}
             className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
           >
-            <option value="day">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-            <option value="all">All Time</option>
+            <option value="day">Hôm nay</option>
+            <option value="week">Tuần này</option>
+            <option value="month">Tháng này</option>
+            <option value="year">Năm nay</option>
+            <option value="all">Tất cả thời gian</option>
           </select>
 
           <select
@@ -184,16 +184,16 @@ const SearchPage = () => {
             onChange={(e) => setSelectedSortBy(e.target.value as any)}
             className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
           >
-            <option value="relevance">Relevance</option>
-            <option value="date">Date</option>
-            <option value="views">Views</option>
+            <option value="relevance">Liên quan nhất</option>
+            <option value="date">Mới nhất</option>
+            <option value="views">Lượt xem</option>
           </select>
         </div>
 
         {videos?.videos.length === 0 ? (
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">No results found</h2>
-            <p className="text-gray-600 dark:text-gray-400">Try different keywords or filters</p>
+            <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Không tìm thấy kết quả</h2>
+            <p className="text-gray-600 dark:text-gray-400">Hãy thử từ khóa hoặc bộ lọc khác</p>
           </div>
         ) : (
           <div className="space-y-4">

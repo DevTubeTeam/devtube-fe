@@ -105,18 +105,18 @@ const MyVideosPage = () => {
   return (
     <>
       <PageMeta
-        title="My Videos - DevTube"
-        description="Manage and organize your uploaded videos. Edit, publish, and track performance of your content."
+        title="Video của tôi - DevTube"
+        description="Quản lý và tải lên video của bạn. Chỉnh sửa, đăng và theo dõi hiệu suất của nội dung của bạn."
       />
       <div className="container max-w-7xl mx-auto py-6 px-4 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Your Videos</h1>
-            <p className="text-muted-foreground">Manage and upload your videos</p>
+            <h1 className="text-2xl font-bold tracking-tight">Danh sách video của bạn</h1>
+            <p className="text-muted-foreground">Quản lý và tải lên video của bạn</p>
           </div>
           <Button onClick={handleOpenUploadModal} className="md:w-auto w-full">
             <Upload className="h-4 w-4 mr-2" />
-            Upload video
+            Tải lên video
           </Button>
         </div>
 

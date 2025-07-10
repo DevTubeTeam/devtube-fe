@@ -33,7 +33,7 @@ const VideoFilterBar = ({
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                     type="search"
-                    placeholder="Search your videos..."
+                    placeholder="Tìm kiếm video của bạn..."
                     className="pl-8"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -45,7 +45,7 @@ const VideoFilterBar = ({
                     <DropdownMenuTrigger asChild>
                         <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full md:w-auto">
                             <Filter className="h-4 w-4 mr-2" />
-                            <span>Filter</span>
+                            <span>Lọc</span>
                             {areAnyFiltersActive() && (
                                 <span className="ml-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
                                     {Object.values(activeFilters.visibility).filter(Boolean).length +
@@ -56,25 +56,25 @@ const VideoFilterBar = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
                         <div className="p-2">
-                            <h4 className="font-medium text-sm mb-1.5">Visibility</h4>
+                            <h4 className="font-medium text-sm mb-1.5">Hiển thị</h4>
                             <div className="space-y-1">
                                 <DropdownMenuCheckboxItem
                                     checked={activeFilters.visibility.public}
                                     onCheckedChange={() => toggleFilter('visibility', 'public')}
                                 >
-                                    Public
+                                    Công khai
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
                                     checked={activeFilters.visibility.private}
                                     onCheckedChange={() => toggleFilter('visibility', 'private')}
                                 >
-                                    Private
+                                    Riêng tư
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
                                     checked={activeFilters.visibility.unlisted}
                                     onCheckedChange={() => toggleFilter('visibility', 'unlisted')}
                                 >
-                                    Unlisted
+                                    Không công khai
                                 </DropdownMenuCheckboxItem>
                             </div>
                         </div>
@@ -82,25 +82,25 @@ const VideoFilterBar = ({
                         <DropdownMenuSeparator />
 
                         <div className="p-2">
-                            <h4 className="font-medium text-sm mb-1.5">Status</h4>
+                            <h4 className="font-medium text-sm mb-1.5">Trạng thái</h4>
                             <div className="space-y-1">
                                 <DropdownMenuCheckboxItem
                                     checked={activeFilters.status.published}
                                     onCheckedChange={() => toggleFilter('status', 'published')}
                                 >
-                                    Published
+                                    Đã xuất bản
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
                                     checked={activeFilters.status.processing}
                                     onCheckedChange={() => toggleFilter('status', 'processing')}
                                 >
-                                    Processing
+                                    Đang xử lý
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
                                     checked={activeFilters.status.draft}
                                     onCheckedChange={() => toggleFilter('status', 'draft')}
                                 >
-                                    Draft
+                                    Nháp
                                 </DropdownMenuCheckboxItem>
                             </div>
                         </div>
@@ -115,7 +115,7 @@ const VideoFilterBar = ({
                                 onClick={clearAllFilters}
                                 disabled={!areAnyFiltersActive()}
                             >
-                                Clear filters
+                                Xóa lọc
                             </Button>
                         </div>
                     </DropdownMenuContent>
@@ -125,14 +125,14 @@ const VideoFilterBar = ({
                     <DropdownMenuTrigger asChild>
                         <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full md:w-auto">
                             <span>
-                                Sort:{' '}
+                                Sắp xếp:{' '}
                                 {sortOption === 'recent'
-                                    ? 'Most recent'
+                                    ? 'Mới nhất'
                                     : sortOption === 'oldest'
-                                        ? 'Oldest'
+                                        ? 'Cũ nhất'
                                         : sortOption === 'views'
-                                            ? 'Most viewed'
-                                            : 'Alphabetical'}
+                                            ? 'Xem nhiều nhất'
+                                            : 'Tên'}
                             </span>
                         </div>
                     </DropdownMenuTrigger>

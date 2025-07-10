@@ -141,3 +141,21 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--scroll-thumb-hover);
 }
+
+.plyr__poster {
+  background-size: cover !important;
+  background-position: center center !important;
+  border-radius: 16px !important; /* hoặc đúng giá trị bạn dùng cho player */
+  /* Đảm bảo không có padding/margin */
+  margin: 0 !important;
+  padding: 0 !important;
+  /* Nếu vẫn bị crop, thử thêm: */
+  height: 100% !important;
+  width: 100% !important;
+  bottom: 0 !important;
+  top: 0 !important;
+}
+
+.plyr {
+  height: 100% !important;
+}

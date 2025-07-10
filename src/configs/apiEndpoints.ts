@@ -17,6 +17,7 @@ const API_ENDPOINTS = {
     UPDATE_USER_PROFILE: '/auth/profile/update',
     GET_USER_PROFILE: '/auth/profile',
     CREATE_AVATAR_PRESIGNED_URL: '/auth/avatar/presigned-url',
+    GET_CHANNELS: '/auth/channels',
   },
   USER: {
     PROFILE: '/user/profile',

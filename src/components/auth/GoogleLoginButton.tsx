@@ -29,12 +29,10 @@ export const GoogleLoginButton = () => {
 
                 handleGoogleCallback(payload);
             } catch (error) {
-                console.error('Login failed:', error);
                 setError('Login failed. Please try again.');
             }
         },
         onError: (error) => {
-            console.error('Google OAuth error:', error);
             setError('Google authentication failed. Please try again.');
         },
         flow: 'auth-code',

@@ -5,7 +5,7 @@ const DashBoardPage = () => {
     <>
       <PageMeta
         title="Dashboard - DevTube"
-        description="Manage your videos, playlists, and channel settings on DevTube."
+        description="Quản lý video, playlist và cài đặt kênh trên DevTube."
       />
       <div>DashBoardPage</div>
     </>

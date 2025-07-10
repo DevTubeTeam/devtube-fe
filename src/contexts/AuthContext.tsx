@@ -63,7 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           navigate(redirectTo, { replace: true });
           toast.success("Login successfully");
         } else {
-          console.error('Unexpected response during Google callback:', status, statusCode);
           navigate('/auth', { replace: true });
         }
       },
@@ -102,8 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       checkSessionMutation.mutate(undefined, {
         onSuccess: (response) => {
           const { statusCode, statusDetail } = response;
-
-          console.log(response);
 
           if (statusCode !== 500) {
             switch (statusDetail) {

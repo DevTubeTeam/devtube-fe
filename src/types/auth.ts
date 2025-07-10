@@ -63,6 +63,13 @@ export interface IChannel {
   updatedAt: string;
 }
 
+export interface IGetChannelsResponse {
+  channels: IChannel[];
+  totalCount: number;
+  page: number;
+  limit: number;
+}
+
 export interface IGetChannelByUserIdResponse {
   channel: IChannel;
 }

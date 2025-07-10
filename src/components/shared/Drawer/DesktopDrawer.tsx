@@ -1,6 +1,8 @@
+import { useAuth } from '@/contexts';
 import { useUser } from '@/hooks/useUser';
 import { cn } from '@/utils';
 import {
+  Bookmark,
   BookOpen,
   ChevronDown,
   ChevronUp,
@@ -8,6 +10,7 @@ import {
   ListVideo,
   Loader2,
   PlaySquare,
+  Search,
   Star,
   ThumbsUp,
   Users,
@@ -15,7 +18,6 @@ import {
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
-import { useAuth } from '@/contexts';
 
 const INITIAL_SHOW_COUNT = 10;
 
@@ -35,7 +37,7 @@ type MenuItemType = {
   path: string;
 };
 
-const DesktopDrawer: React.FC = () => {
+const DesktopDrawer: React.FC<{ isMobileDrawer?: boolean; onClose?: () => void }> = ({ isMobileDrawer, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
@@ -53,6 +55,7 @@ const DesktopDrawer: React.FC = () => {
   const primaryNavItems: MenuItemType[] = [
     { key: 'home', icon: <Home size={18} />, label: 'Trang chủ', path: '/' },
     { key: 'subscriptions', icon: <PlaySquare size={18} />, label: 'Kênh đăng ký', path: ROUTES.CHANNELS },
+    { key: 'explore', icon: <Search size={18} />, label: 'Khám phá', path: ROUTES.EXPLORE },
   ];
 
   const libraryItems: MenuItemType[] = [
@@ -60,6 +63,7 @@ const DesktopDrawer: React.FC = () => {
     { key: 'your-videos', icon: <Users size={18} />, label: 'Video của bạn', path: ROUTES.DASHBOARD_VIDEOS },
     { key: 'watch-later', icon: <Star size={18} />, label: 'Xem sau', path: ROUTES.WATCH_LATER },
     { key: 'liked', icon: <ThumbsUp size={18} />, label: 'Video đã thích', path: ROUTES.LIKED },
+    { key: 'saved', icon: <Bookmark size={18} />, label: 'Video đã lưu', path: ROUTES.SAVED },
   ];
 
   const renderMenuItem = (item: MenuItemType) => {
@@ -103,12 +107,9 @@ const DesktopDrawer: React.FC = () => {
           className="flex items-center px-3 py-1 rounded-md hover:bg-accent/50 cursor-pointer transition-colors"
         >
           <img
-            src={channel.thumbnailUrl || '/avatars/default-channel.png'}
+            src={channel.thumbnailUrl || 'https://cdn-icons-png.flaticon.com/512/1179/1179069.png'}
             alt={channel.name}
             className="w-6 h-6 rounded-full mr-3 object-cover"
-            onError={e => {
-              e.currentTarget.src = '/avatars/default-channel.png';
-            }}
           />
           <span className="flex-1 truncate text-sm">{channel.name}</span>
         </Link>
@@ -125,8 +126,106 @@ const DesktopDrawer: React.FC = () => {
     );
   };
 
+  if (isMobileDrawer) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/50 flex">
+        <div className="bg-background w-64 h-full flex flex-col shadow-lg animate-slide-in-left">
+          <button
+            className="absolute top-3 right-3 p-2 rounded-full hover:bg-accent"
+            onClick={onClose}
+            aria-label="Đóng menu"
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+          </button>
+          {/* Section: Chính */}
+          <div className="mb-2 space-y-1">{primaryNavItems.map(renderMenuItem)}</div>
+          <div className="border-t border-border my-2" />
+
+          {/* Section: Bạn */}
+          <div className="mb-2">
+            <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase">Bạn</h3>
+            <div className="space-y-1">{libraryItems.map(renderMenuItem)}</div>
+          </div>
+          <div className="border-t border-border my-2" />
+
+          {/* Section: Kênh đăng ký */}
+          <div>
+            <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase">
+              Kênh đăng ký
+              {totalSubscribedCount > 0 && (
+                <span className="ml-2 text-xs text-muted-foreground">({totalSubscribedCount})</span>
+              )}
+            </h3>
+            <div className="space-y-1">
+              {!isAuthenticated ? (
+                <div className="px-3 py-2">
+                  <span className="text-sm text-muted-foreground">Bạn chưa đăng nhập</span>
+                </div>
+              ) : isSubscribedChannelsLoading ? (
+                // Loading state
+                <div className="px-3 py-2">
+                  <div className="flex items-center space-x-3">
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Đang tải...</span>
+                  </div>
+                </div>
+              ) : subscribedChannelsError ? (
+                // Error state
+                <div className="px-3 py-2">
+                  <span className="text-sm text-red-500">Lỗi tải kênh đăng ký</span>
+                </div>
+              ) : subscribedChannels.length === 0 ? (
+                // Empty state
+                <div className="px-3 py-2">
+                  <span className="text-sm text-muted-foreground">Chưa đăng ký kênh nào</span>
+                </div>
+              ) : (
+                // Render subscribed channels
+                visibleSubscriptions.map(renderSubscriptionItem)
+              )}
+
+              {/* Show all subscriptions button */}
+              {subscribedChannels.length > 0 && showAllSubscriptions && (
+                <button
+                  onClick={() => navigate('/channels')}
+                  className="flex items-center w-full px-3 py-2 text-sm font-medium hover:bg-accent/50 hover:text-foreground rounded-md transition-colors text-muted-foreground"
+                >
+                  <ListVideo className="w-4 h-4 mr-3" />
+                  Tất cả các kênh đăng ký
+                </button>
+              )}
+
+              {/* Show more/less button */}
+              {hasMoreSubscriptions && (
+                <button
+                  onClick={() => setShowAllSubscriptions(!showAllSubscriptions)}
+                  className="flex items-center w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground rounded-md transition-colors"
+                >
+                  {showAllSubscriptions ? (
+                    <>
+                      <ChevronUp className="w-4 h-4 mr-3" />
+                      Thu gọn
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4 mr-3" />
+                      Hiện thêm {displayChannels.length - INITIAL_SHOW_COUNT} kênh
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* Click outside để đóng */}
+        <div className="flex-1" onClick={onClose} />
+      </div>
+    );
+  }
+
+  // Sidebar desktop
   return (
-    <div className="h-screen flex flex-col bg-background border-r border-border w-64">
+    <div className="hidden md:flex h-screen flex-col bg-background border-r border-border w-64">
       {/* Scroll area cho toàn bộ sidebar */}
       <div className="flex-1 overflow-y-auto custom-scrollbar px-2 py-4">
         {/* Section: Chính */}
