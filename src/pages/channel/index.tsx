@@ -7,7 +7,7 @@ import { VideoCard } from "@/components/video";
 import { useUser } from '@/hooks/useUser';
 import { useVideo } from '@/hooks/useVideo';
 import { motion } from "framer-motion";
-import { Bell, Grid3X3, List, MoreHorizontal, Share2, Users, Video } from "lucide-react";
+import { Bell, Grid3X3, List, Users, Video } from "lucide-react";
 import { useState } from "react";
 import { useParams } from 'react-router-dom';
 import PageMeta from '../../components/common/PageMeta';
@@ -161,16 +161,7 @@ const ChannelPage = () => {
                       </>
                     )}
                   </Button>
-                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 shadow-lg">
-                    <Bell className="w-5 h-5" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 shadow-lg">
-                    <Share2 className="w-5 h-5" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 shadow-lg">
-                    <MoreHorizontal className="w-5 h-5" />
-                  </Button>
-                </div>
+                  </div>
               </div>
 
               {/* Channel Description */}

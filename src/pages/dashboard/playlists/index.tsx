@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useVideo } from "@/hooks/useVideo";
-import { Edit2, Play, Plus, Trash2 } from "lucide-react";
+import { Edit2, Eye, Play, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { IPlaylist } from "../../../types/video";
@@ -139,6 +139,11 @@ const DashboardPlaylistPage = () => {
                         )}
                       </td>
                       <td className="p-3 flex gap-2 justify-center">
+                        <Link to={`/playlist/${playlist.id}`}>
+                          <Button size="icon" variant="outline" className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </Link>
                         <Link to={`/dashboard/playlists/edit/${playlist.id}`}>
                           <Button size="icon" variant="outline">
                             <Edit2 className="w-4 h-4" />

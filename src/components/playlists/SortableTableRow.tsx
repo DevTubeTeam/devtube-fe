@@ -1,7 +1,11 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2 } from "lucide-react";
-import { IVideoMetadata } from "../../types/video";
+import { Eye, GripVertical, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import videoService from "../../services/video.service";
+import { IVideoMetadata, VidStatus } from "../../types/video";
 import { Button } from "../ui/button";
 
 export function SortableTableRow({ id, video, index, onRemove }: {
@@ -10,7 +14,48 @@ export function SortableTableRow({ id, video, index, onRemove }: {
     index: number;
     onRemove: () => void
 }) {
+    const navigate = useNavigate();
+    const [isChecking, setIsChecking] = useState(false);
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+
+    const handleWatch = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Check statusDetail first
+        if (video.statusDetail === 'VIDEO_NOT_READY') {
+            toast.error('Video đang được xử lý, vui lòng quay lại sau.');
+            return;
+        }
+        if (video.statusDetail === 'VIDEO_MISSING_URL') {
+            toast.error('Video hiện không có đường dẫn phát, vui lòng thử lại sau.');
+            return;
+        }
+        if (video.statusDetail === 'VIDEO_NOT_READY_OR_MISSING_URL') {
+            toast.error('Video chưa được xử lý xong. Vui lòng quay lại sau.');
+            return;
+        }
+        if (video.statusDetail === 'VIDEO_NOT_PUBLISHED') {
+            toast.error('Video chưa được xuất bản, hãy xuất bản video trước khi xem.');
+            return;
+        }
+
+        setIsChecking(true);
+        try {
+            const res = await videoService.getVideoStatus(video.id);
+            if (res.data.status !== VidStatus.READY) {
+                toast.error('Video chưa sẵn sàng để xem');
+            } else {
+                navigate(`/video/${video.id}`);
+            }
+        } catch (err) {
+            toast.error('Không thể kiểm tra trạng thái video');
+        } finally {
+            setIsChecking(false);
+        }
+    };
+
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
@@ -75,7 +120,7 @@ export function SortableTableRow({ id, video, index, onRemove }: {
             <td className="p-3">
                 <div className="text-sm text-muted-foreground">{formatViews(video.views)}</div>
             </td>
-            <td className="p-3">
+            <td className="p-3 flex items-center gap-2">
                 <Button
                     variant="ghost"
                     size="icon"
@@ -87,6 +132,17 @@ export function SortableTableRow({ id, video, index, onRemove }: {
                     title="Xóa video khỏi playlist"
                 >
                     <Trash2 className="w-4 h-4" />
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleWatch}
+                    disabled={isChecking}
+                    className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                    title={isChecking ? "Đang kiểm tra..." : "Xem video"}
+                >
+                    <Eye className="w-4 h-4" />
                 </Button>
             </td>
         </tr>
