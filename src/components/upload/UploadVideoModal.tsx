@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { IVideoFile, VidPrivacy } from "@/types/video";
-import { ErrorMessage, Field, Form, Formik } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
@@ -78,7 +79,6 @@ const VideoMetadataSchema = Yup.object().shape({
 // Components
 const ThumbnailUpload = ({ value, onChange }: { value: IVideoFile | null; onChange: (file: IVideoFile | null) => void }) => (
     <div className="space-y-4">
-        <Label>Thumbnail</Label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
                 {value ? (
@@ -210,9 +210,10 @@ export function UploadVideoModal({ isOpen, onClose }: UploadVideoModalProps) {
     const [smoothUploadProgress, setSmoothUploadProgress] = useState(0);
     const [videoId, setVideoId] = useState<string | null>(null);
     const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'processing' | 'ready' | 'error'>('idle');
-    const [uploadToastId, setUploadToastId] = useState<string | number | null>(null);
+    const [uploadToastId, setUploadToastId] = useState<string | number | null>(null)
 
-    const { uploadVideo, updateVideoMetadata } = useUpload({
+
+    const { uploadVideo, updateVideoMetadata, cancelUpload } = useUpload({
         onProgress: (progress) => {
             setSmoothUploadProgress(progress);
             if (progress === 100) {
@@ -251,7 +252,9 @@ export function UploadVideoModal({ isOpen, onClose }: UploadVideoModalProps) {
         setUploadToastId(toastId);
 
         try {
-            const result = await uploadVideoMutation({ file: videoFile });
+            const result = await uploadVideoMutation({
+                file: videoFile,
+            });
             setVideoId(result.videoId);
             setUploadStatus('ready');
 
@@ -358,9 +361,16 @@ export function UploadVideoModal({ isOpen, onClose }: UploadVideoModalProps) {
     }, [isOpen]);
 
     // Xử lý đóng modal
-    const handleClose = () => {
+    const handleClose = async () => {
         if (isUploadingPending) {
             if (confirm('Bạn có chắc muốn hủy quá trình upload không?')) {
+                if (videoId) {
+                    // Gọi API xóa video nếu đã có videoId
+                    // await deleteVideo(videoId); // Nếu có mutation xóa video
+                } else if (file && file.s3Key && file.uploadId) {
+                    // Nếu chưa có videoId nhưng file đã có s3Key và uploadId thì abort upload
+                    await cancelUpload.mutateAsync(file);
+                }
                 onClose();
             }
             return;
@@ -433,102 +443,162 @@ export function UploadVideoModal({ isOpen, onClose }: UploadVideoModalProps) {
                                     validationSchema={VideoMetadataSchema}
                                     enableReinitialize
                                 >
-                                    {({ values, setFieldValue, isSubmitting, errors, touched }) => (
-                                        <Form className="space-y-6">
-                                            <ThumbnailUpload
-                                                value={values.thumbnail}
-                                                onChange={(file) => setFieldValue('thumbnail', file)}
-                                            />
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="title">Tiêu đề (bắt buộc)</Label>
-                                                <Field
-                                                    as={Input}
-                                                    id="title"
-                                                    name="title"
-                                                    placeholder="Nhập tiêu đề video"
-                                                />
-                                                <ErrorMessage name="title" component="div" className="text-sm text-destructive" />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="description">Mô tả</Label>
-                                                <Field
-                                                    as={Textarea}
-                                                    id="description"
-                                                    name="description"
-                                                    placeholder="Nhập mô tả video"
-                                                    className="min-h-[100px]"
-                                                />
-                                                <ErrorMessage name="description" component="div" className="text-sm text-destructive" />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="category">Danh mục (bắt buộc)</Label>
-                                                <Select
-                                                    value={values.category}
-                                                    onValueChange={(value) => setFieldValue('category', value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Chọn danh mục" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {CATEGORIES.map((category) => (
-                                                            <SelectItem key={category} value={category}>
-                                                                {category}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <ErrorMessage name="category" component="div" className="text-sm text-destructive" />
-                                            </div>
-
-                                            <TagsInput
-                                                value={values.tags}
-                                                onChange={(tags) => setFieldValue('tags', tags)}
-                                            />
-
-                                            <div className="space-y-4">
-                                                <Label>Quyền riêng tư</Label>
-                                                <div className="grid gap-4">
-                                                    <VisibilitySelector
-                                                        value={values.privacy}
-                                                        onChange={(value) => setFieldValue('privacy', value)}
+                                    {({ values, setFieldValue, isSubmitting, errors, touched, submitCount }) => {
+                                        const isSaveButtonDisabled =
+                                            !videoId ||
+                                            isUploadingPending ||
+                                            isSubmitting ||
+                                            Object.keys(errors).length > 0 ||
+                                            !values.title.trim() ||
+                                            !values.category ||
+                                            !values.thumbnail;
+                                        // Helper lấy lý do lỗi cho từng field
+                                        const getFieldError = (field: keyof FormValues) => {
+                                            if (!isSaveButtonDisabled) return null;
+                                            if (field === 'title' && (!values.title.trim())) return 'Tiêu đề là bắt buộc';
+                                            if (field === 'category' && !values.category) return 'Danh mục là bắt buộc';
+                                            if (field === 'thumbnail' && !values.thumbnail) return 'Thumbnail là bắt buộc';
+                                            if (errors[field as keyof FormValues]) return errors[field as keyof FormValues] as string;
+                                            return null;
+                                        };
+                                        // Helper xác định màu * cho từng field
+                                        const getAsteriskClass = (field: keyof FormValues) => {
+                                            if (getFieldError(field)) return "text-destructive";
+                                            return "text-primary";
+                                        };
+                                        return (
+                                            <Form className="space-y-6">
+                                                {/* Tiêu đề */}
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="title">
+                                                        Tiêu đề
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <span className={"cursor-help ml-1 " + getAsteriskClass('title')}>*</span>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="w-auto px-2 py-1 text-xs">
+                                                                {getFieldError('title') || 'Bắt buộc'}
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </Label>
+                                                    <Field
+                                                        as={Input}
+                                                        id="title"
+                                                        name="title"
+                                                        placeholder="Nhập tiêu đề video"
                                                     />
-                                                </div>
-                                                <ErrorMessage name="privacy" component="div" className="text-sm text-destructive" />
-                                            </div>
-
-                                            <DialogFooter className="mt-4">
-                                                <Button
-                                                    type="submit"
-                                                    disabled={
-                                                        !videoId ||
-                                                        isUploadingPending ||
-                                                        isSubmitting ||
-                                                        Object.keys(errors).length > 0 ||
-                                                        !values.title.trim() ||
-                                                        !values.category ||
-                                                        !values.thumbnail
-                                                    }
-                                                >
-                                                    {isUploadingPending ? (
-                                                        <>
-                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                            Đang upload...
-                                                        </>
-                                                    ) : isSubmitting ? (
-                                                        <>
-                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                            Đang lưu...
-                                                        </>
-                                                    ) : (
-                                                        'Lưu'
+                                                    {((touched.title || submitCount > 0) && !isSaveButtonDisabled && errors.title) && (
+                                                        <div className="text-sm text-destructive">{errors.title}</div>
                                                     )}
-                                                </Button>
-                                            </DialogFooter>
-                                        </Form>
-                                    )}
+                                                </div>
+                                                {/* Mô tả */}
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="description">Mô tả</Label>
+                                                    <Field
+                                                        as={Textarea}
+                                                        id="description"
+                                                        name="description"
+                                                        placeholder="Nhập mô tả video"
+                                                        className="min-h-[100px]"
+                                                    />
+                                                    {((touched.description || submitCount > 0) && !isSaveButtonDisabled && errors.description) && (
+                                                        <div className="text-sm text-destructive">{errors.description}</div>
+                                                    )}
+                                                </div>
+                                                {/* Danh mục */}
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="category">
+                                                        Danh mục
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <span className={"cursor-help ml-1 " + getAsteriskClass('category')}>*</span>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="w-auto px-2 py-1 text-xs">
+                                                                {getFieldError('category') || 'Bắt buộc'}
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </Label>
+                                                    <Select
+                                                        value={values.category}
+                                                        onValueChange={(value) => setFieldValue('category', value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Chọn danh mục" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {CATEGORIES.map((category) => (
+                                                                <SelectItem key={category} value={category}>
+                                                                    {category}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {((touched.category || submitCount > 0) && !isSaveButtonDisabled && errors.category) && (
+                                                        <div className="text-sm text-destructive">{errors.category}</div>
+                                                    )}
+                                                </div>
+                                                {/* Thumbnail */}
+                                                <div className="space-y-2">
+                                                    <Label>
+                                                        Thumbnail
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <span className={"cursor-help ml-1 " + getAsteriskClass('thumbnail')}>*</span>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="w-auto px-2 py-1 text-xs">
+                                                                {getFieldError('thumbnail') || 'Bắt buộc'}
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </Label>
+                                                    <ThumbnailUpload
+                                                        value={values.thumbnail}
+                                                        onChange={(file) => setFieldValue('thumbnail', file)}
+                                                    />
+                                                    {((touched.thumbnail || submitCount > 0) && !isSaveButtonDisabled && errors.thumbnail) && (
+                                                        <div className="text-sm text-destructive">{errors.thumbnail}</div>
+                                                    )}
+                                                </div>
+                                                {/* Tags */}
+                                                <TagsInput
+                                                    value={values.tags}
+                                                    onChange={(tags) => setFieldValue('tags', tags)}
+                                                />
+                                                {/* Quyền riêng tư */}
+                                                <div className="space-y-4">
+                                                    <Label>Quyền riêng tư</Label>
+                                                    <div className="grid gap-4">
+                                                        <VisibilitySelector
+                                                            value={values.privacy}
+                                                            onChange={(value) => setFieldValue('privacy', value)}
+                                                        />
+                                                    </div>
+                                                    {((touched.privacy || submitCount > 0) && !isSaveButtonDisabled && errors.privacy) && (
+                                                        <div className="text-sm text-destructive">{errors.privacy}</div>
+                                                    )}
+                                                </div>
+                                                <DialogFooter className="mt-4">
+                                                    <Button
+                                                        type="submit"
+                                                        disabled={isSaveButtonDisabled}
+                                                    >
+                                                        {isUploadingPending ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                Đang upload...
+                                                            </>
+                                                        ) : isSubmitting ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                Đang lưu...
+                                                            </>
+                                                        ) : (
+                                                            'Lưu'
+                                                        )}
+                                                    </Button>
+                                                </DialogFooter>
+                                            </Form>
+                                        );
+                                    }}
                                 </Formik>
                             </div>
                         )}

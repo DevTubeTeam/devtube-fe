@@ -54,8 +54,8 @@ export function useUpload(options: UploadOptions = {}) {
   // Mutation: Upload video
   const uploadVideo = () => {
     return useMutation({
-      mutationFn: async (params: UploadParams): Promise<UploadResult> => {
-        const { file } = params;
+      mutationFn: async (params: UploadParams & { onPresigned?: (data: IPresignedUrlResponse) => void }): Promise<UploadResult> => {
+        const { file, onPresigned } = params;
         if (!file) throw new Error('File is required for upload');
         const validTypes = [
           'video/mp4',
@@ -80,6 +80,7 @@ export function useUpload(options: UploadOptions = {}) {
           if (!presignedData) throw new Error('Failed to get presigned URLs');
           file.s3Key = presignedData.key;
           file.uploadId = presignedData.uploadId;
+          if (onPresigned) onPresigned(presignedData); // Gọi callback ở đây
           const parts = await videoService.uploadToS3WithMultipartPresignedUrl(
             file,
             presignedData,
