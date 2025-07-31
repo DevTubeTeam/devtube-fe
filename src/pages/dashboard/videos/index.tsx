@@ -79,16 +79,21 @@ const MyVideosPage = () => {
     return myVideos
       ?.filter((video) => {
         const matchesSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesVisibility =
-          !areAnyFiltersActive() ||
+
+        // Check if any visibility filters are active
+        const hasVisibilityFilters = Object.values(activeFilters.visibility).some(val => val);
+        const matchesVisibility = !hasVisibilityFilters ||
           (activeFilters.visibility.public && video.privacy === 0) ||
           (activeFilters.visibility.private && video.privacy === 1) ||
           (activeFilters.visibility.unlisted && video.privacy === 2);
-        const matchesStatus =
-          !areAnyFiltersActive() ||
-          (activeFilters.status.published && video.status === 1) ||
-          (activeFilters.status.processing && video.status === 2) ||
-          (activeFilters.status.draft && video.status === 0);
+
+        // Check if any status filters are active  
+        const hasStatusFilters = Object.values(activeFilters.status).some(val => val);
+        const matchesStatus = !hasStatusFilters ||
+          (activeFilters.status.published && video.status === 3) || // READY = 3
+          (activeFilters.status.processing && video.status === 2) || // PROCESSING = 2
+          (activeFilters.status.draft && video.status === 0); // PENDING = 0
+
         return matchesSearch && matchesVisibility && matchesStatus;
       })
       .sort((a, b) => {
