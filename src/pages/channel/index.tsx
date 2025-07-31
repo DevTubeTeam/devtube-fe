@@ -42,7 +42,7 @@ const ChannelPage = () => {
   const isSubscribed = isSubscribedData?.status ?? false;
   const subscribersCount = subscribersCountData?.data?.totalCount ?? 0;
   const channelVideos = channelVideosData?.videos ?? [];
-  const channelPlaylists = channelPlaylistsData?.playlists ?? [];
+  const channelPlaylists = (channelPlaylistsData?.playlists ?? []).filter(playlist => playlist.isPublic);
 
 
   const handleSubscribe = () => {
@@ -161,7 +161,7 @@ const ChannelPage = () => {
                       </>
                     )}
                   </Button>
-                  </div>
+                </div>
               </div>
 
               {/* Channel Description */}
