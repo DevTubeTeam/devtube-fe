@@ -21,7 +21,10 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const WatchPage = () => {
+
+
   const { videoId } = useParams<{ videoId: string }>();
+  console.log('VideoId', videoId);
   const {
     useGetComments,
     useVideoById,
@@ -45,7 +48,7 @@ const WatchPage = () => {
     useIsSubscribed,
     useGetChannelSubscribersCount
   } = useUser();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   // Video and comments hooks
   const createCommentMutation = useCreateComment(videoId || '');

@@ -63,14 +63,6 @@ export const appRoutes: RouteObject[] = [
             ),
           },
           {
-            path: ROUTES.PLAYLISTS,
-            element: (
-              <ProtectedRoute role='user'>
-                <Playlists />
-              </ProtectedRoute>
-            ),
-          },
-          {
             path: ROUTES.PLAYLIST(),
             element: (
               <ProtectedRoute role='user'>

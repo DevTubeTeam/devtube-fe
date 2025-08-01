@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import videoService from "../../services/video.service";
 import { IVideoMetadata, VidStatus } from "../../types/video";
+import { formatDuration, formatViews } from "../../utils/format-video-info.util";
 import { Button } from "../ui/button";
 
 export function SortableTableRow({ id, video, index, onRemove }: {
@@ -65,20 +66,7 @@ export function SortableTableRow({ id, video, index, onRemove }: {
 
     if (!video) return null;
 
-    const formatDuration = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
 
-    const formatViews = (views: number) => {
-        if (views >= 1000000) {
-            return `${(views / 1000000).toFixed(1)}M`;
-        } else if (views >= 1000) {
-            return `${(views / 1000).toFixed(1)}K`;
-        }
-        return views.toString();
-    };
 
     return (
         <tr

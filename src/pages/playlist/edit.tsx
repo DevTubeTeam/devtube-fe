@@ -10,6 +10,7 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-ki
 import { ArrowLeft, GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { SortableTableRow } from "../../components/playlists/SortableTableRow";
 import { ROUTES } from "../../constants/routes";
 
@@ -21,21 +22,24 @@ export default function PlaylistEditPage() {
     // Lấy thông tin playlist
     const { data: playlistData, isLoading: loadingPlaylist } = useGetPlaylistById(id!);
 
+    console.log('playlistData', playlistData);
+
     // Mutation
     const editVideoPlaylist = useEditVideoPlaylist();
 
     // State cho kéo thả
     const [videos, setVideos] = useState<IVideoMetadata[]>([]);
     useEffect(() => {
+        console.log('useEffect triggered');
+        console.log('playlistData?.playlist?.videos:', playlistData?.playlist?.videos);
+
         if (playlistData?.playlist?.videos) {
+            console.log('Setting videos...');
             setVideos(
-                playlistData.playlist.videos.filter(
-                    v => v.statusDetail !== 'VIDEO_NOT_READY' &&
-                        v.statusDetail !== 'VIDEO_MISSING_URL' &&
-                        v.statusDetail !== 'VIDEO_NOT_READY_OR_MISSING_URL' &&
-                        v.statusDetail !== 'VIDEO_NOT_PUBLISHED'
-                )
+                playlistData.playlist.videos
             );
+        } else {
+            console.log('No videos found in playlistData');
         }
     }, [playlistData?.playlist?.videos]);
 
@@ -49,15 +53,30 @@ export default function PlaylistEditPage() {
             const oldIndex = videos.findIndex(v => v.id === active.id);
             const newIndex = videos.findIndex(v => v.id === over?.id);
             const newOrder = arrayMove(videos, oldIndex, newIndex);
+
+            // Lưu trạng thái cũ để rollback nếu cần
+            const previousVideos = [...videos];
+
+            // Optimistic update
             setVideos(newOrder);
 
-            // Gọi API cập nhật thứ tự mới
-            editVideoPlaylist.mutate({
-                playlistId: id!,
-                data: {
-                    videos: newOrder,
+            // Gọi API cập nhật thứ tự mới với rollback logic
+            editVideoPlaylist.mutate(
+                {
+                    playlistId: id!,
+                    data: {
+                        videos: newOrder,
+                    }
+                },
+                {
+                    onError: (error) => {
+                        // Rollback về trạng thái cũ nếu API thất bại
+                        console.error('Failed to reorder videos in playlist:', error);
+                        setVideos(previousVideos);
+                        toast.error('Không thể sắp xếp lại thứ tự video. Vui lòng thử lại.');
+                    }
                 }
-            });
+            );
         }
     };
 
@@ -69,12 +88,32 @@ export default function PlaylistEditPage() {
     const handleConfirmDelete = () => {
         if (videoToDelete) {
             const newVideos = videos.filter(v => v.id !== videoToDelete.id);
+
+            // Lưu trạng thái cũ để rollback nếu cần
+            const previousVideos = [...videos];
+
+            // Optimistic update
             setVideos(newVideos);
-            editVideoPlaylist.mutate({ playlistId: id!, data: { videos: newVideos } });
-            console.log('Đã xóa video:', videoToDelete.title);
+
+            // Gọi API với rollback logic
+            editVideoPlaylist.mutate(
+                { playlistId: id!, data: { videos: newVideos } },
+                {
+                    onError: (error) => {
+                        // Rollback về trạng thái cũ nếu API thất bại
+                        console.error('Failed to delete video from playlist:', error);
+                        setVideos(previousVideos);
+                        toast.error('Không thể xóa video khỏi playlist. Vui lòng thử lại.');
+                    },
+                    onSuccess: () => {
+                        // Đóng dialog và reset state khi thành công
+                        setDeleteDialogOpen(false);
+                        setVideoToDelete(null);
+                        toast.success('Đã xóa video khỏi playlist thành công.');
+                    }
+                }
+            );
         }
-        setDeleteDialogOpen(false);
-        setVideoToDelete(null);
     };
 
     const handleCancelDelete = () => {
